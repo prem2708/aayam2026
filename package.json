@@ -1,0 +1,15 @@
+{
+  "name": "aayamtechfest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aayam TechFest Management Platform",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:admin": "npm run dev --prefix admin",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:admin": "npm run build --prefix admin",
+    "seed:admin": "npm run seed:admin --prefix backend"
+  }
+}

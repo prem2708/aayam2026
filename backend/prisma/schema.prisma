@@ -1,0 +1,206 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum app_role {
+  student
+  volunteer
+  event_manager
+  admin
+  super_admin
+}
+
+enum event_category {
+  technical
+  cultural
+  gaming
+  workshop
+  hackathon
+}
+
+enum event_status {
+  draft
+  open
+  closed
+  ongoing
+  completed
+  cancelled
+}
+
+enum reg_status {
+  pending
+  confirmed
+  rejected
+  cancelled
+}
+
+enum announce_scope {
+  all
+  event
+  category
+}
+
+model users {
+  id            String          @id
+  email         String          @unique
+  name          String
+  college       String          @default("")
+  branch        String?
+  year          Int?            // maps to SMALLINT
+  phone         String?
+  role          app_role        @default(student)
+  avatar_url    String?
+  created_at    DateTime        @default(now()) @db.Timestamptz
+  updated_at    DateTime        @default(now()) @updatedAt @db.Timestamptz
+  teams         teams[]
+  registrations registrations[]
+  bookmarks     bookmarks[]
+}
+
+model admin_users {
+  id                    String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                 String          @unique
+  password_hash         String
+  name                  String
+  role                  app_role        @default(admin)
+  totp_secret           String?
+  totp_enabled          Boolean         @default(false)
+  failed_login_attempts Int             @default(0) @db.SmallInt
+  locked_until          DateTime?       @db.Timestamptz
+  last_login_at         DateTime?       @db.Timestamptz
+  created_at            DateTime        @default(now()) @db.Timestamptz
+  updated_at            DateTime        @default(now()) @updatedAt @db.Timestamptz
+  events                events[]
+  announcements         announcements[]
+  audit_logs            audit_logs[]
+}
+
+model events {
+  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String
+  slug               String          @unique
+  category           event_category
+  description        String
+  rules              String?
+  poster_url          String?
+  poster_file_id      String?
+  banner_url          String?
+  banner_file_id      String?
+  payment_qr_url      String?
+  payment_qr_file_id  String?
+  bank_name           String?
+  bank_account_no     String?
+  bank_ifsc           String?
+  bank_recipient_name String?
+  whatsapp_link      String?
+  venue               String?
+  event_start_at     DateTime        @db.Timestamptz
+  event_end_at       DateTime        @db.Timestamptz
+  reg_start_at       DateTime        @db.Timestamptz
+  reg_end_at         DateTime        @db.Timestamptz
+  is_team_event      Boolean         @default(false)
+  min_team_size      Int             @default(1) @db.SmallInt
+  max_team_size      Int             @default(1) @db.SmallInt
+  participant_cap    Int?
+  amount             Int?
+  requires_approval  Boolean         @default(false)
+  allow_cancellation Boolean         @default(true)
+  is_featured        Boolean         @default(false)
+  status             event_status    @default(draft)
+  prizes             Json            @default("{}")
+  coordinators       Json            @default("[]")
+  created_by         String?         @db.Uuid
+  created_by_user    admin_users?    @relation(fields: [created_by], references: [id])
+  created_at         DateTime        @default(now()) @db.Timestamptz
+  updated_at         DateTime        @default(now()) @updatedAt @db.Timestamptz
+  deleted_at         DateTime?       @db.Timestamptz
+  teams              teams[]
+  registrations      registrations[]
+  bookmarks          bookmarks[]
+  announcements      announcements[]
+
+  @@index([status])
+  @@index([category])
+  @@index([slug])
+}
+
+model teams {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String          @db.Uuid
+  event           events          @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  name            String
+  registration_no String          @unique
+  leader_id       String
+  leader          users           @relation(fields: [leader_id], references: [id])
+  members         Json?           @default("[]")
+  code_expires_at DateTime        @db.Timestamptz
+  created_at      DateTime        @default(now()) @db.Timestamptz
+  registrations   registrations[]
+
+  @@index([registration_no])
+}
+
+model registrations {
+  id                    String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id              String      @db.Uuid
+  event                 events      @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  user_id               String
+  user                  users       @relation(fields: [user_id], references: [id])
+  team_id               String?     @db.Uuid
+  team                  teams?      @relation(fields: [team_id], references: [id])
+  status                reg_status  @default(pending)
+  qr_token              String      @unique
+  registration_no       String?
+  payment_proof_url     String?
+  payment_proof_file_id String?
+  attended_at           DateTime?   @db.Timestamptz
+  registered_at         DateTime    @default(now()) @db.Timestamptz
+
+  @@unique([event_id, user_id])
+  @@index([event_id])
+  @@index([user_id])
+}
+
+model bookmarks {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String
+  user       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  event_id   String   @db.Uuid
+  event      events   @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  @@unique([user_id, event_id])
+  @@index([user_id])
+}
+
+model announcements {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String
+  body            String
+  scope           announce_scope
+  event_id        String?         @db.Uuid
+  event           events?         @relation(fields: [event_id], references: [id])
+  category        event_category?
+  scheduled_at    DateTime?       @db.Timestamptz
+  sent_at         DateTime?       @db.Timestamptz
+  created_by      String?         @db.Uuid
+  created_by_user admin_users?    @relation(fields: [created_by], references: [id])
+  created_at      DateTime        @default(now()) @db.Timestamptz
+}
+
+model audit_logs {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  admin_id      String?      @db.Uuid
+  admin         admin_users? @relation(fields: [admin_id], references: [id])
+  action        String
+  resource_type String
+  resource_id   String?
+  metadata      Json         @default("{}")
+  created_at    DateTime     @default(now()) @db.Timestamptz
+}

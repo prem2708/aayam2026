@@ -1,0 +1,13 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+
+# Frontend and Admin deploy separately to Vercel (recommended)
+# Supabase is cloud-hosted — run supabase/schema.sql in SQL Editor
