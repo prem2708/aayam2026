@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function Loading() {
   return (
@@ -21,8 +21,14 @@ export default function Loading() {
           {/* Rotating outer ring */}
           <div className="absolute h-16 w-16 rounded-2xl border-2 border-violet-500/20 border-t-violet-400 animate-spin" />
           {/* Pulse center logo */}
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 shadow-[0_0_20px_rgba(139,92,246,0.4)]">
-            <Sparkles className="h-5 w-5 text-white animate-pulse" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 shadow-[0_0_20px_rgba(139,92,246,0.4)] overflow-hidden">
+            <motion.img 
+              animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              src="https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png" 
+              alt="Aayam Logo" 
+              className="h-7 w-7 object-contain rounded" 
+            />
           </div>
         </div>
 

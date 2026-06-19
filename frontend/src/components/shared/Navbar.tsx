@@ -36,17 +36,12 @@ export function Navbar() {
             alt="RKDF Logo" 
             className="h-7 sm:h-9 w-auto object-contain" 
           />
-          <img 
+          <motion.img 
+            whileHover={{ scale: 1.1, rotate: 15 }}
             src="https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png" 
             alt="Aayam Logo" 
             className="h-7 sm:h-9 w-auto object-contain rounded" 
           />
-          <motion.div 
-            whileHover={{ scale: 1.1, rotate: 15 }}
-            className="flex h-7.5 w-7.5 sm:h-9 sm:w-9 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-violet-600 via-purple-500 to-cyan-400 shadow-[0_0_15px_rgba(139,92,246,0.3)]"
-          >
-            <Sparkles className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5 text-white" />
-          </motion.div>
           <span className="text-sm sm:text-lg font-bold tracking-wider font-heading">
             Aayam<span className="gradient-text font-black">TechFest</span>
           </span>
