@@ -16,7 +16,8 @@ import imagekitRoutes from './routes/imagekit.routes';
 const app = express();
 
 app.use(helmet());
-const cleanUrl = (url: string) => {
+const cleanUrl = (url: any) => {
+  if (!url || typeof url !== 'string') return '';
   try {
     const parsed = new URL(url);
     return `${parsed.protocol}//${parsed.host}`;
