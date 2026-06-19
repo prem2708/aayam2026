@@ -93,19 +93,35 @@ function RegistrationsContent() {
     });
   };
 
-  function exportExcel() {
+  async function exportExcel() {
     if (!eventId) return;
     const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
     const token = localStorage.getItem('admin_token');
-    fetch(`${base}/events/${eventId}/export`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `registrations-${eventId}.xlsx`;
-        a.click();
+    try {
+      const res = await fetch(`${base}/events/${eventId}/export`, { 
+        headers: { Authorization: `Bearer ${token}` } 
       });
+
+      if (!res.ok) {
+        const text = await res.text();
+        let message = 'Failed to export registrations';
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed.error?.message || parsed.message || message;
+        } catch (_) {}
+        throw new Error(message);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `registrations-${eventId}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to export registrations');
+    }
   }
 
   return (

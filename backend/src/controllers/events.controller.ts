@@ -290,7 +290,7 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename=registrations-${eventId}.xlsx`);
-    res.send(buffer);
+    res.send(Buffer.from(buffer));
   } catch (error: any) {
     throw new AppError(500, error.message);
   }
