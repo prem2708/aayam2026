@@ -15,6 +15,8 @@ import imagekitRoutes from './routes/imagekit.routes';
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 app.use(helmet());
 const cleanUrl = (url: any) => {
   if (!url || typeof url !== 'string') return '';
