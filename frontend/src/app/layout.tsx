@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   description:
     'Discover and register for technical, cultural, gaming, workshop, and hackathon events at Aayam TechFest 2026 — India\'s premier college technical festival.',
   keywords: ['Aayam TechFest', 'tech fest', 'college fest', 'hackathon', 'events', 'registration'],
+  icons: {
+    icon: 'https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png',
+  },
   openGraph: {
     title: 'Aayam TechFest 2026',
     description: 'Innovate. Compete. Celebrate. Register for fest events now.',

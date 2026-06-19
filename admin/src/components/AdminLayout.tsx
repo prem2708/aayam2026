@@ -39,9 +39,11 @@ export function AdminSidebar() {
       )}>
         <div className="flex h-full flex-col p-4">
           <div className="flex items-center gap-2 px-2 py-4 mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-cyan-600">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
+            <img 
+              src="https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png" 
+              alt="Aayam Logo" 
+              className="h-9 w-auto object-contain rounded" 
+            />
             <div>
               <p className="font-bold text-sm">Aayam Admin</p>
               <p className="text-xs text-slate-500 capitalize">{user?.role?.replace('_', ' ')}</p>

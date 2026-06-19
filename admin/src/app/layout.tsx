@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: { default: 'Aayam TechFest Admin', template: '%s | Admin' },
   description: 'Admin panel for Aayam TechFest management',
   robots: { index: false, follow: false },
+  icons: {
+    icon: 'https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

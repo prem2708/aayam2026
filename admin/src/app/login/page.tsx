@@ -82,9 +82,11 @@ export default function LoginPage() {
         className="w-full max-w-md glass rounded-2xl p-8"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-600 mb-4">
-            <Sparkles className="h-7 w-7 text-white" />
-          </div>
+          <img 
+            src="https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png" 
+            alt="Aayam Logo" 
+            className="h-16 w-auto mx-auto mb-4 object-contain rounded" 
+          />
           <h1 className="text-2xl font-bold">Admin Portal</h1>
           <p className="text-slate-400 text-sm mt-1">Aayam TechFest Management</p>
         </div>
