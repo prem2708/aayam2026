@@ -53,6 +53,10 @@ app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(publicLimiter);
 
+app.get('/', (_req, res) => {
+  res.send('Aayam TechFest API is running successfully!');
+});
+
 app.get('/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok', service: 'aayamtechfest-api' } });
 });
