@@ -103,6 +103,7 @@ export function EventDetailClient({ event }: { event: Event }) {
       fd.append('signature', authRes.data.signature);
       fd.append('expire', String(authRes.data.expire));
       fd.append('token', authRes.data.token);
+      fd.append('folder', '/payment-proofs');
 
       const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
         method: 'POST',

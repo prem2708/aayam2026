@@ -9,9 +9,10 @@ interface ImageUploadProps {
   valueUrl: string;
   valueFileId: string;
   onChange: (url: string, fileId: string) => void;
+  folder?: string;
 }
 
-export function ImageUpload({ label, valueUrl, valueFileId, onChange }: ImageUploadProps) {
+export function ImageUpload({ label, valueUrl, valueFileId, onChange, folder }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,6 +36,9 @@ export function ImageUpload({ label, valueUrl, valueFileId, onChange }: ImageUpl
       formData.append('signature', signature);
       formData.append('expire', String(expire));
       formData.append('token', token);
+      if (folder) {
+        formData.append('folder', folder);
+      }
 
       const res = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
         method: 'POST',

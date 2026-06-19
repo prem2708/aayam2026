@@ -227,8 +227,8 @@ export default function EditEventPage({ params }: PageProps) {
         <div className="glass rounded-xl p-6 space-y-4">
           <h2 className="text-lg font-semibold text-violet-400">Event Media</h2>
           <div className="grid gap-6 md:grid-cols-2">
-            <ImageUpload label="Event Poster (Portrait)" valueUrl={poster.url} valueFileId={poster.fileId} onChange={(url, fileId) => setPoster({ url, fileId })} />
-            <ImageUpload label="Event Banner (Landscape)" valueUrl={banner.url} valueFileId={banner.fileId} onChange={(url, fileId) => setBanner({ url, fileId })} />
+            <ImageUpload label="Event Poster (Portrait)" valueUrl={poster.url} valueFileId={poster.fileId} onChange={(url, fileId) => setPoster({ url, fileId })} folder="/posters" />
+            <ImageUpload label="Event Banner (Landscape)" valueUrl={banner.url} valueFileId={banner.fileId} onChange={(url, fileId) => setBanner({ url, fileId })} folder="/banners" />
           </div>
         </div>
 
@@ -350,7 +350,7 @@ export default function EditEventPage({ params }: PageProps) {
         <div className="glass rounded-xl p-6 space-y-4">
           <h2 className="text-lg font-semibold text-violet-400">Payment Details (Optional)</h2>
           <div className="grid gap-6 md:grid-cols-2">
-            <ImageUpload label="Payment QR Code" valueUrl={paymentQr.url} valueFileId={paymentQr.fileId} onChange={(url, fileId) => setPaymentQr({ url, fileId })} />
+            <ImageUpload label="Payment QR Code" valueUrl={paymentQr.url} valueFileId={paymentQr.fileId} onChange={(url, fileId) => setPaymentQr({ url, fileId })} folder="/payment-qrs" />
             <div className="space-y-4">
               <div><label className="text-sm text-slate-300 mb-1 block">Amount</label><input type="number" step="1" min={0} {...register('amount')} className={inputClass} placeholder="Optional" /></div>
               <div><label className="text-sm text-slate-300 mb-1 block">Bank Name</label><input {...register('bank_name')} className={inputClass} placeholder="e.g. State Bank of India" /></div>
