@@ -55,6 +55,7 @@ export interface Registration {
   status: string;
   qr_token: string;
   registration_no?: string;
+  transaction_id?: string;
   registered_at: string;
   attended_at?: string;
   events: Event;

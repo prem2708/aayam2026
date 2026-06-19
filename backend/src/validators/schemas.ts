@@ -107,6 +107,7 @@ export const registerSchema = z.object({
   team_members: z.array(z.string()).optional(),
   payment_proof_url: z.string().url().optional().nullable().or(z.literal('')),
   payment_proof_file_id: z.string().optional().nullable(),
+  transaction_id: z.string().optional().nullable().or(z.literal('')),
 });
 
 export const joinTeamSchema = z.object({
@@ -114,6 +115,7 @@ export const joinTeamSchema = z.object({
   event_id: z.string().uuid(),
   payment_proof_url: z.string().url().optional().nullable().or(z.literal('')),
   payment_proof_file_id: z.string().optional().nullable(),
+  transaction_id: z.string().optional().nullable().or(z.literal('')),
 });
 
 export const scanSchema = z.object({

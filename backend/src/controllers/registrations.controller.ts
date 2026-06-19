@@ -91,8 +91,13 @@ export async function registerForEvent(req: AuthRequest, res: import('express').
 
   // Enforce payment proof if event requires payment
   const requiresPayment = !!event.payment_qr_url || !!event.bank_name;
-  if (requiresPayment && !req.body.payment_proof_url) {
-    throw new AppError(400, 'Payment proof screenshot is required for this event');
+  if (requiresPayment) {
+    if (!req.body.payment_proof_url) {
+      throw new AppError(400, 'Payment proof screenshot is required for this event');
+    }
+    if (!req.body.transaction_id || !req.body.transaction_id.trim()) {
+      throw new AppError(400, 'UTR No / Transaction ID is required for this event');
+    }
   }
 
   // Admin approval required if event requires_approval OR has payment details configured
@@ -110,6 +115,7 @@ export async function registerForEvent(req: AuthRequest, res: import('express').
         registration_no,
         payment_proof_url: req.body.payment_proof_url || null,
         payment_proof_file_id: req.body.payment_proof_file_id || null,
+        transaction_id: req.body.transaction_id || null,
       },
       include: {
         team: {
@@ -175,7 +181,17 @@ export async function joinTeam(req: AuthRequest, res: import('express').Response
   if (existing) throw new AppError(400, 'Already registered');
 
   // Admin approval required if event requires_approval OR has payment details configured
-  const requiresApproval = event.requires_approval || !!event.payment_qr_url || !!event.bank_name;
+  const requiresPayment = !!event.payment_qr_url || !!event.bank_name;
+  if (requiresPayment) {
+    if (!req.body.payment_proof_url) {
+      throw new AppError(400, 'Payment proof screenshot is required for this event');
+    }
+    if (!req.body.transaction_id || !req.body.transaction_id.trim()) {
+      throw new AppError(400, 'UTR No / Transaction ID is required for this event');
+    }
+  }
+
+  const requiresApproval = event.requires_approval || requiresPayment;
   const status = requiresApproval ? 'pending' : 'confirmed';
 
   try {
@@ -189,6 +205,7 @@ export async function joinTeam(req: AuthRequest, res: import('express').Response
         registration_no: team.registration_no,
         payment_proof_url: req.body.payment_proof_url || null,
         payment_proof_file_id: req.body.payment_proof_file_id || null,
+        transaction_id: req.body.transaction_id || null,
       },
       include: {
         team: {

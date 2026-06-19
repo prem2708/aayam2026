@@ -271,7 +271,7 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
       },
     }) as any[];
 
-    const headers = ['Name', 'Email', 'College', 'Branch', 'Team', 'Status', 'Registered At', 'Attended'];
+    const headers = ['Name', 'Email', 'College', 'Branch', 'Team', 'Status', 'Registered At', 'Attended', 'UTR / Transaction ID'];
     const rows = data.map((r: any) => [
       r.user?.name || '',
       r.user?.email || '',
@@ -281,6 +281,7 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
       r.status,
       r.registered_at.toISOString(),
       r.attended_at ? r.attended_at.toISOString() : 'No',
+      r.transaction_id || '',
     ]);
 
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);

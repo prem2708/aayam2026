@@ -45,6 +45,7 @@ export function EventDetailClient({ event }: { event: Event }) {
     Array(Math.max(0, event.max_team_size - 1)).fill('')
   );
   const [paymentProof, setPaymentProof] = useState({ url: '', fileId: '' });
+  const [transactionId, setTransactionId] = useState('');
   const [uploadingProof, setUploadingProof] = useState(false);
 
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -86,6 +87,12 @@ export function EventDetailClient({ event }: { event: Event }) {
   async function handleUploadProof(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!transactionId.trim()) {
+      toast.error('Please enter your UTR No / Transaction ID first.');
+      e.target.value = '';
+      return;
+    }
 
     setUploadingProof(true);
     try {
@@ -135,9 +142,15 @@ export function EventDetailClient({ event }: { event: Event }) {
     }
 
     const requiresPayment = !!event.payment_qr_url || !!event.bank_name;
-    if (requiresPayment && !paymentProof.url) {
-      toast.error('Please upload your payment proof screenshot first.');
-      return;
+    if (requiresPayment) {
+      if (!transactionId.trim()) {
+        toast.error('Please enter your UTR No / Transaction ID.');
+        return;
+      }
+      if (!paymentProof.url) {
+        toast.error('Please upload your payment proof screenshot first.');
+        return;
+      }
     }
 
     if (event.is_team_event) {
@@ -205,9 +218,15 @@ export function EventDetailClient({ event }: { event: Event }) {
     }
 
     const requiresPayment = !!event.payment_qr_url || !!event.bank_name;
-    if (requiresPayment && !paymentProof.url) {
-      toast.error('Please upload your payment proof screenshot first.');
-      return;
+    if (requiresPayment) {
+      if (!transactionId.trim()) {
+        toast.error('Please enter your UTR No / Transaction ID.');
+        return;
+      }
+      if (!paymentProof.url) {
+        toast.error('Please upload your payment proof screenshot first.');
+        return;
+      }
     }
 
     if (event.is_team_event) {
@@ -258,6 +277,7 @@ export function EventDetailClient({ event }: { event: Event }) {
         event_id: event.id,
         payment_proof_url: paymentProof.url || null,
         payment_proof_file_id: paymentProof.fileId || null,
+        transaction_id: transactionId.trim() || null,
       };
       if (event.is_team_event) {
         body.team_name = teamName;
@@ -501,39 +521,80 @@ export function EventDetailClient({ event }: { event: Event }) {
                   
                   {/* Payment Screenshot Upload */}
                   {(event.payment_qr_url || event.bank_name) && (
-                    <div className="mb-5 space-y-2.5">
-                      <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
-                        Upload Transfer Receipt Screenshot <span className="text-red-500">*</span>
-                      </label>
-                      {paymentProof.url ? (
-                        <div className="flex items-center gap-3.5 p-2 bg-slate-900 border border-slate-800 rounded-xl">
-                          <img src={paymentProof.url} alt="Proof" className="h-10 w-10 object-cover rounded-lg border border-slate-800" />
-                          <span className="text-xs text-slate-300 flex-1 truncate font-mono">receipt_proof.jpg</span>
-                          <button
-                            type="button"
-                            onClick={() => setPaymentProof({ url: '', fileId: '' })}
-                            className="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 rounded-lg hover:bg-slate-950 transition-all"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ) : (
-                        <label className="flex flex-col items-center justify-center border border-dashed border-slate-800 hover:border-violet-500/50 rounded-xl p-5 bg-slate-950/20 hover:bg-slate-950/60 cursor-pointer transition-all duration-300">
-                          {uploadingProof ? (
-                            <div className="flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin text-violet-400" />
-                              <span className="text-xs text-slate-400">Uploading...</span>
-                            </div>
-                          ) : (
-                            <div className="text-center">
-                              <span className="text-xs text-slate-300 font-semibold block">Click to upload screenshot</span>
-                              <span className="text-[10px] text-slate-500 block mt-1">JPEG, PNG up to 10MB</span>
-                            </div>
-                          )}
-                          <input type="file" onChange={handleUploadProof} disabled={uploadingProof} className="hidden" accept="image/*" />
+                    <>
+                      {/* UTR / Transaction ID Input */}
+                      <div className="mb-5 space-y-2.5">
+                        <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
+                          UTR No / Transaction ID <span className="text-red-500">*</span>
                         </label>
-                      )}
-                    </div>
+                        <input
+                          type="text"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          placeholder="Enter UTR or Transaction ID"
+                          className={inputClass}
+                          disabled={uploadingProof || !!paymentProof.url}
+                        />
+                        {!transactionId.trim() && (
+                          <p className="text-[10px] text-amber-500/90 font-medium">
+                            ⚠ Must be filled before uploading payment proof.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="mb-5 space-y-2.5">
+                        <label className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
+                          Upload Transfer Receipt Screenshot <span className="text-red-500">*</span>
+                        </label>
+                        {paymentProof.url ? (
+                          <div className="flex items-center gap-3.5 p-2 bg-slate-900 border border-slate-800 rounded-xl">
+                            <img src={paymentProof.url} alt="Proof" className="h-10 w-10 object-cover rounded-lg border border-slate-800" />
+                            <span className="text-xs text-slate-300 flex-1 truncate font-mono">receipt_proof.jpg</span>
+                            <button
+                              type="button"
+                              onClick={() => setPaymentProof({ url: '', fileId: '' })}
+                              className="text-xs text-red-400 hover:text-red-300 font-bold px-3 py-1.5 rounded-lg hover:bg-slate-950 transition-all"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <label
+                            className={cn(
+                              "flex flex-col items-center justify-center border border-dashed border-slate-800 rounded-xl p-5 bg-slate-950/20 transition-all duration-300",
+                              !transactionId.trim()
+                                ? "opacity-50 cursor-not-allowed border-amber-500/20"
+                                : "hover:border-violet-500/50 hover:bg-slate-950/60 cursor-pointer"
+                            )}
+                            onClick={(e) => {
+                              if (!transactionId.trim()) {
+                                e.preventDefault();
+                                toast.error('Please enter your UTR No / Transaction ID first.');
+                              }
+                            }}
+                          >
+                            {uploadingProof ? (
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-violet-400" />
+                                <span className="text-xs text-slate-400">Uploading...</span>
+                              </div>
+                            ) : (
+                              <div className="text-center">
+                                <span className="text-xs text-slate-300 font-semibold block">Click to upload screenshot</span>
+                                <span className="text-[10px] text-slate-500 block mt-1">JPEG, PNG up to 10MB</span>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              onChange={handleUploadProof}
+                              disabled={uploadingProof || !transactionId.trim()}
+                              className="hidden"
+                              accept="image/*"
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </>
                   )}
 
                   <button 

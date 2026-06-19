@@ -205,14 +205,21 @@ function RegistrationsContent() {
                     </td>
                     <td className="p-3">
                       {r.payment_proof_url ? (
-                        <a
-                          href={r.payment_proof_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 bg-violet-600/10 border border-violet-500/20 px-2 py-1 rounded"
-                        >
-                          <Eye className="h-3.5 w-3.5" /> View Proof
-                        </a>
+                        <div className="flex flex-col gap-1">
+                          <a
+                            href={r.payment_proof_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 bg-violet-600/10 border border-violet-500/20 px-2 py-1 rounded w-max"
+                          >
+                            <Eye className="h-3.5 w-3.5" /> View Proof
+                          </a>
+                          {r.transaction_id && (
+                            <span className="text-[11px] text-slate-400 font-mono select-all" title="UTR / Transaction ID">
+                              UTR: {r.transaction_id}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-xs text-slate-600">None</span>
                       )}
