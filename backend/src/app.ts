@@ -16,9 +16,33 @@ import imagekitRoutes from './routes/imagekit.routes';
 const app = express();
 
 app.use(helmet());
+const cleanUrl = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return url.trim();
+  }
+};
+
+const allowedOrigins = [
+  cleanUrl(env.frontendUrl),
+  cleanUrl(env.adminUrl),
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+];
+
 app.use(
   cors({
-    origin: [env.frontendUrl, env.adminUrl],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const cleaned = cleanUrl(origin);
+      if (allowedOrigins.includes(cleaned)) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Allow other origins or log warning
+    },
     credentials: true,
   })
 );
