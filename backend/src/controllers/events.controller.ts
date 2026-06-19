@@ -1,4 +1,5 @@
 import { validate as isUuid } from 'uuid';
+import * as XLSX from 'xlsx';
 import { prisma } from '../config/prisma';
 import { AppError } from '../utils/errors';
 import { slugify, paginate } from '../utils/helpers';
@@ -282,10 +283,14 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
       r.attended_at ? r.attended_at.toISOString() : 'No',
     ]);
 
-    const csv = [headers, ...rows].map((row) => row.map((c) => `"${c}"`).join(',')).join('\n');
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename=registrations-${eventId}.csv`);
-    res.send(csv);
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=registrations-${eventId}.xlsx`);
+    res.send(buffer);
   } catch (error: any) {
     throw new AppError(500, error.message);
   }

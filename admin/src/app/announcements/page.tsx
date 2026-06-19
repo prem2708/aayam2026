@@ -31,6 +31,9 @@ export default function AnnouncementsPage() {
       qc.invalidateQueries({ queryKey: ['announcements'] });
       reset();
       toast.success('Announcement posted');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (e: any) => toast.error(e.message || 'Failed to post'),
   });
@@ -46,6 +49,9 @@ export default function AnnouncementsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['announcements'] });
       toast.success('Announcement deleted');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (e: any) => toast.error(e.message || 'Failed to delete'),
   });

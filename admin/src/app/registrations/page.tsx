@@ -51,6 +51,9 @@ function RegistrationsContent() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['registrations', eventId] });
       toast.success('Registration status updated');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (e: any) => toast.error(e.message || 'Failed to update status'),
   });
@@ -90,18 +93,17 @@ function RegistrationsContent() {
     });
   };
 
-  function exportCsv() {
+  function exportExcel() {
     if (!eventId) return;
     const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
     const token = localStorage.getItem('admin_token');
-    window.open(`${base}/events/${eventId}/export`, '_blank');
     fetch(`${base}/events/${eventId}/export`, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.blob())
       .then((blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `registrations-${eventId}.csv`;
+        a.download = `registrations-${eventId}.xlsx`;
         a.click();
       });
   }
@@ -111,8 +113,8 @@ function RegistrationsContent() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Registrations</h1>
         {eventId && (
-          <button onClick={exportCsv} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-4 py-2 text-sm">
-            <Download className="h-4 w-4" /> Export CSV
+          <button onClick={exportExcel} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-4 py-2 text-sm">
+            <Download className="h-4 w-4" /> Export Excel
           </button>
         )}
       </div>
