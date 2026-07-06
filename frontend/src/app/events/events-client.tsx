@@ -43,10 +43,10 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
   return (
     <div className="relative min-h-screen pb-20">
       {/* Background patterns */}
-      <div className="absolute inset-0 -z-10 bg-slate-950">
-        <div className="absolute inset-0 grid-bg opacity-40" />
-        <div className="absolute top-[10%] right-[5%] h-[300px] w-[300px] rounded-full bg-violet-600/10 blur-[100px] animate-pulse-glow" />
-        <div className="absolute bottom-[20%] left-[5%] h-[300px] w-[300px] rounded-full bg-cyan-500/10 blur-[100px] animate-pulse-glow" />
+      <div className="absolute inset-0 -z-10 bg-background">
+        <div className="absolute inset-0 grid-bg opacity-50" />
+        <div className="absolute top-[8%] right-[5%] h-[320px] w-[320px] rounded-full animate-pulse-glow" style={{ background: 'rgba(188,19,254,0.1)', filter: 'blur(100px)' }} />
+        <div className="absolute bottom-[18%] left-[5%] h-[300px] w-[300px] rounded-full animate-pulse-glow" style={{ background: 'rgba(0,240,255,0.08)', filter: 'blur(100px)' }} />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 relative">
@@ -55,12 +55,13 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center sm:text-left border-b border-slate-900 pb-8"
+          className="text-center sm:text-left pb-8"
+          style={{ borderBottom: '1px solid rgba(0,240,255,0.1)' }}
         >
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight font-heading">
             Explore <span className="gradient-text">All Events</span>
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-slate-400 font-sans">
+          <p className="mt-2 text-sm sm:text-base font-sans" style={{ color: 'rgba(226,245,255,0.5)' }}>
             Filter, search, and register for technical challenges, workshops, and tournaments
           </p>
         </motion.div>
@@ -72,9 +73,14 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="relative flex items-center group rounded-2xl border border-slate-800/80 bg-slate-950/50 backdrop-blur-md px-4 py-1.5 focus-within:border-violet-500/50 focus-within:ring-2 focus-within:ring-violet-500/15 focus-within:shadow-[0_0_20px_rgba(139,92,246,0.15)] transition-all duration-300"
+            className="relative flex items-center group rounded-2xl px-4 py-1.5 transition-all duration-300"
+            style={{
+              border: '1px solid rgba(0,240,255,0.15)',
+              background: 'rgba(0,15,22,0.6)',
+              backdropFilter: 'blur(16px)',
+            }}
           >
-            <Search className="h-5 w-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
+            <Search className="h-5 w-5 transition-colors" style={{ color: 'rgba(0,240,255,0.5)' }} />
             <input
               type="search"
               placeholder="Search events by title or keywords..."
@@ -83,9 +89,10 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
               className="w-full bg-transparent border-none outline-none py-3 px-3.5 text-sm text-white placeholder:text-slate-500 focus:ring-0"
             />
             {search && (
-              <button 
+              <button
                 onClick={() => setSearch('')}
-                className="text-xs text-slate-500 hover:text-slate-300 font-semibold px-2 py-1 rounded-lg hover:bg-slate-900 transition-all"
+                className="text-xs font-semibold px-2 py-1 rounded-lg transition-all"
+                style={{ color: 'rgba(0,240,255,0.6)' }}
               >
                 Clear
               </button>
@@ -99,8 +106,8 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
             transition={{ delay: 0.15 }}
             className="space-y-2.5"
           >
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 px-1 font-heading">
-              <Filter className="h-3 w-3 text-violet-400" /> Categories
+            <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 px-1 font-heading" style={{ color: 'rgba(0,240,255,0.5)' }}>
+              <Filter className="h-3 w-3" style={{ color: '#00f0ff' }} /> Categories
             </span>
             <div className="flex flex-wrap gap-2 pt-1">
               {categories.map((cat) => {
@@ -110,14 +117,23 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
                     key={cat}
                     onClick={() => setCategory(cat)}
                     className={cn(
-                      'relative rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors duration-300 cursor-pointer',
-                      isActive ? 'text-violet-300' : 'text-slate-400 hover:text-slate-200'
+                      'relative rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all duration-300 cursor-pointer',
+                      isActive ? '' : 'hover:text-white'
                     )}
+                    style={isActive
+                      ? { color: '#00f0ff' }
+                      : { color: 'rgba(226,245,255,0.45)' }
+                    }
                   >
                     {isActive && (
                       <motion.span
                         layoutId="activeCategoryTab"
-                        className="absolute inset-0 bg-violet-500/10 rounded-xl border border-violet-500/25 shadow-[0_0_15px_rgba(139,92,246,0.1)] -z-10"
+                        className="absolute inset-0 rounded-xl -z-10"
+                        style={{
+                          background: 'rgba(0,240,255,0.08)',
+                          border: '1px solid rgba(0,240,255,0.25)',
+                          boxShadow: '0 0 12px rgba(0,240,255,0.12)',
+                        }}
                         transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                       />
                     )}
@@ -135,8 +151,8 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
             transition={{ delay: 0.2 }}
             className="space-y-2.5 pt-2"
           >
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 px-1 font-heading">
-              <SlidersHorizontal className="h-3 w-3 text-cyan-400" /> Status
+            <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 px-1 font-heading" style={{ color: 'rgba(188,19,254,0.6)' }}>
+              <SlidersHorizontal className="h-3 w-3" style={{ color: '#bc13fe' }} /> Status
             </span>
             <div className="flex flex-wrap gap-2">
               {statuses.map((s) => {
@@ -145,24 +161,29 @@ export function EventsPageClient({ initialEvents }: { initialEvents: Event[] }) 
                   <button
                     key={s}
                     onClick={() => setStatus(s)}
-                    className={cn(
-                      'relative rounded-lg px-3.5 py-1.5 text-xs font-semibold capitalize transition-all duration-300 border cursor-pointer',
-                      isActive 
-                        ? 'bg-cyan-600/10 text-cyan-300 border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.1)]' 
-                        : 'bg-transparent border-slate-900 text-slate-500 hover:text-slate-300 hover:border-slate-800'
-                    )}
+                    className="relative rounded-lg px-3.5 py-1.5 text-xs font-semibold capitalize transition-all duration-300 cursor-pointer"
+                    style={isActive ? {
+                      background: 'rgba(188,19,254,0.1)',
+                      border: '1px solid rgba(188,19,254,0.28)',
+                      color: '#bc13fe',
+                      boxShadow: '0 0 10px rgba(188,19,254,0.12)',
+                    } : {
+                      border: '1px solid rgba(226,245,255,0.08)',
+                      color: 'rgba(226,245,255,0.38)',
+                    }}
                   >
                     {s}
                   </button>
                 );
               })}
-              
+
               {(category !== 'all' || status !== 'all' || search) && (
                 <button
                   onClick={() => { setCategory('all'); setStatus('all'); setSearch(''); }}
-                  className="rounded-lg border border-red-500/20 bg-red-950/10 px-3.5 py-1.5 text-xs font-bold text-red-400 hover:bg-red-950/20 hover:border-red-500/30 flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="rounded-lg px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                  style={{ border: '1px solid rgba(255,0,127,0.25)', background: 'rgba(255,0,127,0.07)', color: '#ff007f' }}
                 >
-                  <RefreshCw className="h-3 w-3" /> Reset Filters
+                  <RefreshCw className="h-3 w-3" /> Reset
                 </button>
               )}
             </div>

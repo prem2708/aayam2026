@@ -26,11 +26,11 @@ export const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  technical: 'from-blue-500 to-cyan-500',
-  cultural: 'from-pink-500 to-rose-500',
-  gaming: 'from-purple-500 to-violet-500',
+  technical: 'from-sky-500 to-cyan-500',
+  cultural: 'from-orange-400 to-rose-400',
+  gaming: 'from-violet-500 to-fuchsia-500',
   workshop: 'from-amber-500 to-orange-500',
-  hackathon: 'from-emerald-500 to-teal-500',
+  hackathon: 'from-emerald-500 to-green-600',
 };
 
 export const STATUS_COLORS: Record<string, string> = {

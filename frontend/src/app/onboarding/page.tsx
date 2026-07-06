@@ -73,20 +73,20 @@ export default function OnboardingPage() {
         {(['name', 'college', 'branch', 'phone'] as const).map((field) => (
           <div key={field}>
             <label className="block text-sm font-medium text-slate-300 mb-1 capitalize">{field}</label>
-            <input {...register(field)} className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50" />
+            <input {...register(field)} className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50" />
             {errors[field] && <p className="text-red-400 text-xs mt-1">{errors[field]?.message}</p>}
           </div>
         ))}
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-1">Year</label>
-          <select {...register('year')} className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50">
+          <select {...register('year')} className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50">
             <option value="">Select year</option>
             {[1, 2, 3, 4, 5, 6].map((y) => (
               <option key={y} value={y}>Year {y}</option>
             ))}
           </select>
         </div>
-        <button type="submit" disabled={submitting} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 py-3 font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2">
+        <button type="submit" disabled={submitting} className="w-full rounded-xl bg-gradient-to-r from-primary to-accent-secondary py-3 font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2">
           {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Continue'}
         </button>
       </form>

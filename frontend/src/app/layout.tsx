@@ -1,19 +1,19 @@
 import type { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
-import { Space_Grotesk, Outfit } from 'next/font/google';
+import { Sora, DM_Sans } from 'next/font/google';
 import { Navbar } from '@/components/shared/Navbar';
 import { Footer } from '@/components/shared/Footer';
 import { Providers } from '@/components/providers';
 import './globals.css';
 
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
+const sora = Sora({
+  variable: '--font-sora',
   subsets: ['latin'],
   display: 'swap',
 });
 
-const outfit = Outfit({
-  variable: '--font-outfit',
+const dmSans = DM_Sans({
+  variable: '--font-dm-sans',
   subsets: ['latin'],
   display: 'swap',
 });
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${spaceGrotesk.variable} ${outfit.variable} h-full`}>
-        <body className="min-h-full flex flex-col antialiased bg-background text-foreground">
+      <html lang="en" className={`${sora.variable} ${dmSans.variable} h-full`} suppressHydrationWarning>
+        <body className="min-h-full flex flex-col antialiased bg-background text-foreground" suppressHydrationWarning>
           <Providers>
             <Navbar />
             <main className="flex-1 pt-20">{children}</main>

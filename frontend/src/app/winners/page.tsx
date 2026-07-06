@@ -60,10 +60,10 @@ export default function WinnersPage() {
   const winners = winnersData[activeEdition] || [];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pt-24 pb-20 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-background text-white pt-24 pb-20 relative overflow-hidden font-sans">
       {/* Background radial glows */}
-      <div className="absolute top-[15%] left-[-10%] h-[400px] w-[400px] rounded-full bg-violet-600/5 blur-[150px] -z-10" />
-      <div className="absolute bottom-[10%] right-[-10%] h-[400px] w-[400px] rounded-full bg-cyan-600/5 blur-[150px] -z-10" />
+      <div className="absolute top-[15%] left-[-10%] h-[400px] w-[400px] rounded-full bg-accent/5 blur-[150px] -z-10" />
+      <div className="absolute bottom-[10%] right-[-10%] h-[400px] w-[400px] rounded-full bg-accent-secondary/5 blur-[150px] -z-10" />
       
       {/* Grid Pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 -z-20" />
@@ -72,7 +72,7 @@ export default function WinnersPage() {
         
         {/* Page Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-950/40 border border-violet-500/20 text-xs font-semibold text-violet-300 mb-4 tracking-wider uppercase">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs font-semibold text-accent-secondary mb-4 tracking-wider uppercase">
             <Trophy className="h-3.5 w-3.5 text-amber-400 animate-bounce" /> Hall of Champions
           </div>
           <h1 className="text-4xl sm:text-5xl font-black font-heading tracking-tight mb-4">
@@ -94,14 +94,14 @@ export default function WinnersPage() {
                   onClick={() => setActiveEdition(edition)}
                   className={`relative px-6 py-2.5 text-sm font-bold rounded-xl border transition-all cursor-pointer ${
                     isActive 
-                      ? 'bg-violet-600 border-violet-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]' 
+                      ? 'bg-primary border-primary text-white shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]' 
                       : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                   }`}
                 >
                   {isActive && (
                     <motion.span
                       layoutId="activeEditionTab"
-                      className="absolute inset-0 bg-violet-500/10 rounded-xl -z-10 border border-violet-500/20"
+                      className="absolute inset-0 bg-accent/10 rounded-xl -z-10 border border-accent/20"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -126,10 +126,10 @@ export default function WinnersPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="glass rounded-3xl p-6 border border-slate-900/60 hover:border-violet-500/20 relative overflow-hidden group transition-all duration-300"
+                className="glass rounded-3xl p-6 border border-slate-900/60 hover:border-accent/20 relative overflow-hidden group transition-all duration-300"
               >
                 {/* Accent glow corner */}
-                <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-violet-500/10 to-transparent pointer-events-none" />
+                <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-accent/10 to-transparent pointer-events-none" />
                 
                 <div className="flex justify-between items-start mb-4">
                   <div>
