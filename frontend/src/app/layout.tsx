@@ -21,7 +21,7 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: {
-    default: 'Aayam TechFest 2026 | Register for Events',
+    default: 'Aayam TechFest 2026 | RKDF UNIVERSITY RANCHI',
     template: '%s | Aayam TechFest',
   },
   description:
