@@ -15,18 +15,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/winners`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.7 },
   ];
 
-  // 2. Fetch dynamic event routes from the backend API
+  // 2. Fetch dynamic event routes from the backend API (handling pagination since limit is capped at 50)
   let dynamicEventRoutes: MetadataRoute.Sitemap = [];
   try {
-    const res = await apiFetch<Event[]>('/events?limit=100');
-    if (res.success && res.data) {
-      dynamicEventRoutes = res.data.map((event) => ({
-        url: `${siteUrl}/events/${event.slug}`,
-        lastModified: new Date(event.event_start_at || new Date()),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      }));
+    let allEvents: Event[] = [];
+    let page = 1;
+    const limit = 50;
+    let hasMore = true;
+
+    while (hasMore) {
+      const res = await apiFetch<Event[]>(`/events?limit=${limit}&page=${page}`);
+      if (res.success && res.data && res.data.length > 0) {
+        allEvents = allEvents.concat(res.data);
+        const total = (res.meta as any)?.total || 0;
+        if (allEvents.length >= total || res.data.length < limit) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      } else {
+        hasMore = false;
+      }
     }
+
+    dynamicEventRoutes = allEvents.map((event) => ({
+      url: `${siteUrl}/events/${event.slug}`,
+      lastModified: new Date(event.event_start_at || new Date()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
   } catch (error) {
     console.error('Error generating sitemap events dynamic routes:', error);
   }
