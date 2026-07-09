@@ -42,10 +42,7 @@ export const metadata: Metadata = {
     title: 'Aayam TechFest 2026',
     description: 'Register for technical festival events',
   },
-  robots: { index: true, follow: true },
-  verification: {
-    google: '-tLV5LGzklIMBfcWQzZMSEMgq4uT35lAkcimmIBuXtw', // ← Replace with code from Google Search Console
-  },
+  
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
