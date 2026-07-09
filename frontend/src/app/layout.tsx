@@ -43,6 +43,9 @@ export const metadata: Metadata = {
     description: 'Register for technical festival events',
   },
   robots: { index: true, follow: true },
+  verification: {
+    google: 'PASTE_YOUR_CODE_HERE', // ← Replace with code from Google Search Console
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
