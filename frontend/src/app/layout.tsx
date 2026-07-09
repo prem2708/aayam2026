@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   verification: {
-    google: 'PASTE_YOUR_CODE_HERE', // ← Replace with code from Google Search Console
+    google: '-tLV5LGzklIMBfcWQzZMSEMgq4uT35lAkcimmIBuXtw', // ← Replace with code from Google Search Console
   },
 };
 
