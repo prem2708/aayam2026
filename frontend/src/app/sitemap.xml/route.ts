@@ -3,10 +3,14 @@ import { apiFetch, Event } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://aayamtechfest2026.vercel.app';
+export async function GET(request: Request) {
+  // 1. Determine siteUrl dynamically from request headers, fallback to env, then hardcoded fallback
+  const url = new URL(request.url);
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || url.host;
+  const protocol = request.headers.get('x-forwarded-proto') || (url.protocol === 'https:' ? 'https' : 'http');
+  const siteUrl = `${protocol}://${host}`;
 
-  // 1. Build the same sitemap data as the standard Next.js convention
+  // 2. Build the same sitemap data as the standard Next.js convention
   const staticRoutes = [
     { url: `${siteUrl}`, lastModified: new Date().toISOString(), changeFrequency: 'daily', priority: '1.0' },
     { url: `${siteUrl}/about`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: '0.8' },
@@ -15,7 +19,7 @@ export async function GET() {
     { url: `${siteUrl}/winners`, lastModified: new Date().toISOString(), changeFrequency: 'weekly', priority: '0.7' },
   ];
 
-  // 2. Fetch dynamic event routes from the backend API (handling pagination)
+  // 3. Fetch dynamic event routes from the backend API (handling pagination)
   let dynamicEventRoutes: typeof staticRoutes = [];
   try {
     let allEvents: Event[] = [];
@@ -50,9 +54,8 @@ export async function GET() {
 
   const allRoutes = [...staticRoutes, ...dynamicEventRoutes];
 
-  // 3. Generate XML with XSLT stylesheet reference
+  // 4. Generate XML (removed XSLT reference since it doesn't exist and causes blank pages in browser)
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="${siteUrl}/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allRoutes
   .map(
