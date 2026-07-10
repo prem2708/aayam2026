@@ -16,9 +16,9 @@ async function fetchEventsPage(apiUrl: string, page: number, limit: number): Pro
 
   try {
     const res = await fetch(`${apiUrl}/events?page=${page}&limit=${limit}`, {
-      redirect: 'follow',             // follow HTTP→HTTPS redirects (Render.com)
+      redirect: 'follow',   // follow HTTP→HTTPS redirects (Render.com)
       signal: controller.signal,
-      next: { revalidate: 3600 },    // ISR cache: regenerate in background every hour
+      cache: 'no-store',    // always fetch live — bypasses Next.js Data Cache
     });
 
     if (!res.ok) return [];
