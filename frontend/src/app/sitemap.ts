@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-export const revalidate = 3600; // Revalidate sitemap at most every hour
+export const dynamic = 'force-dynamic'; // Always fetch live data — never pre-render at build time
 
 interface Event {
   slug: string;
