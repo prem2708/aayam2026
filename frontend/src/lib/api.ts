@@ -45,6 +45,8 @@ export interface Event {
   amount?: number;
   status: string;
   is_featured: boolean;
+  created_at?: string;
+  updated_at?: string;
   prizes?: Record<string, string>;
   coordinators?: { name: string; contact?: string }[];
 }

@@ -1,13 +1,16 @@
 import { MetadataRoute } from 'next';
+import { Event } from '@/lib/api';
+import { getApiUrl, getSiteUrl, PUBLIC_ROUTES } from '@/lib/site';
 
-export const dynamic = 'force-dynamic'; // Always fetch live data — never pre-render at build time
+export const dynamic = 'force-dynamic';
 
-interface Event {
-  slug: string;
-  updated_at?: string;
-  created_at?: string;
-  deleted_at?: string | null;
+interface EventsPageResponse {
+  success: boolean;
+  data?: Event[];
+  meta?: { page: number; limit: number; total: number };
 }
+
+const INDEXABLE_EVENT_STATUSES = new Set(['open', 'closed', 'ongoing', 'completed']);
 
 /** Fetch one page of events with redirect-follow and an 8-second timeout. */
 async function fetchEventsPage(apiUrl: string, page: number, limit: number): Promise<Event[]> {
@@ -16,65 +19,66 @@ async function fetchEventsPage(apiUrl: string, page: number, limit: number): Pro
 
   try {
     const res = await fetch(`${apiUrl}/events?page=${page}&limit=${limit}`, {
-      redirect: 'follow',   // follow HTTP→HTTPS redirects (Render.com)
+      redirect: 'follow',
       signal: controller.signal,
-      cache: 'no-store',    // always fetch live — bypasses Next.js Data Cache
+      cache: 'no-store',
     });
 
     if (!res.ok) return [];
 
-    const json = await res.json();
+    const json = (await res.json()) as EventsPageResponse;
     return Array.isArray(json.data) ? json.data : [];
   } finally {
     clearTimeout(timer);
   }
 }
 
+function toEventSitemapEntry(baseUrl: string, event: Event): MetadataRoute.Sitemap[number] | null {
+  if (!event.slug?.trim()) return null;
+  if (!INDEXABLE_EVENT_STATUSES.has(event.status)) return null;
+
+  const lastMod = event.updated_at || event.created_at || new Date().toISOString();
+
+  return {
+    url: `${baseUrl}/events/${event.slug}`,
+    lastModified: new Date(lastMod),
+    changeFrequency: 'weekly',
+    priority: event.is_featured ? 0.8 : 0.6,
+  };
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Prefer server-side vars (no NEXT_PUBLIC_ prefix) for server-only routes like sitemap
-  const baseUrl =
-    process.env.SITE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://aayamtechfest2026.vercel.app';
+  const baseUrl = getSiteUrl();
+  const apiUrl = getApiUrl();
+  const now = new Date();
 
-  const apiUrl =
-    process.env.API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    'https://aayam2026.onrender.com/api/v1';
+  const staticRoutes: MetadataRoute.Sitemap = PUBLIC_ROUTES.map((route) => ({
+    url: `${baseUrl}${route.path}`,
+    lastModified: now,
+    changeFrequency: route.changeFrequency,
+    priority: route.priority,
+  }));
 
-  // ── Static routes ───────────────────────────────────────────────────────
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}`,         lastModified: new Date(), changeFrequency: 'daily',  priority: 1.0 },
-    { url: `${baseUrl}/about`,   lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/events`,  lastModified: new Date(), changeFrequency: 'daily',  priority: 0.9 },
-    { url: `${baseUrl}/winners`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${baseUrl}/help`,    lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
-  ];
-
-  // ── Dynamic event routes (paginated, max 50/page per backend validator) ─
-  let dynamicRoutes: MetadataRoute.Sitemap = [];
+  const dynamicRoutes: MetadataRoute.Sitemap = [];
   const limit = 50;
+  const seenSlugs = new Set<string>();
 
   for (let page = 1; ; page++) {
     try {
       const events = await fetchEventsPage(apiUrl, page, limit);
 
-      const eventRoutes = events.map((event) => {
-        const lastMod = event.updated_at || event.created_at || new Date().toISOString();
-        return {
-          url: `${baseUrl}/events/${event.slug}`,
-          lastModified: new Date(lastMod),
-          changeFrequency: 'weekly' as const,
-          priority: 0.6,
-        };
-      });
+      for (const event of events) {
+        if (seenSlugs.has(event.slug)) continue;
 
-      dynamicRoutes = [...dynamicRoutes, ...eventRoutes];
+        const entry = toEventSitemapEntry(baseUrl, event);
+        if (!entry) continue;
 
-      // Reached last page
+        seenSlugs.add(event.slug);
+        dynamicRoutes.push(entry);
+      }
+
       if (events.length < limit) break;
     } catch (error) {
-      // Timeout or network error — return what we have so far
       console.error(`[sitemap] Failed to fetch events page ${page}:`, error);
       break;
     }
