@@ -81,8 +81,8 @@ export default function HelpPage() {
             <div>
               <h3 className="font-bold text-white text-base mb-1">Email Support</h3>
               <p className="text-xs text-slate-500 mb-3">Shoot us a mail for registration disputes</p>
-              <a href="mailto:support@aayam2026.com" className="text-sm font-semibold text-accent hover:text-accent-secondary transition-colors">
-                support@aayam2026.com
+              <a href="mailto:support.aayamtechfest@gmail.com" className="text-sm font-semibold text-accent hover:text-accent-secondary transition-colors">
+                support.aayamtechfest@gmail.com
               </a>
             </div>
           </div>
