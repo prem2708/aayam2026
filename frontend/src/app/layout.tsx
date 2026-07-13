@@ -49,6 +49,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en" className={`${sora.variable} ${dmSans.variable} h-full`} suppressHydrationWarning>
+        <head>
+          <script async src="https://www.googletagmanager.com/gtag/js?id=G-L6Q66GEMWC"></script>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-L6Q66GEMWC');
+              `,
+            }}
+          />
+        </head>
         <body className="min-h-full flex flex-col antialiased bg-background text-foreground" suppressHydrationWarning>
           <Providers>
             <Navbar />
