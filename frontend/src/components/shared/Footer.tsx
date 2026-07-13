@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Mail } from 'lucide-react';
+import { useAuth } from '@clerk/nextjs';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -14,6 +15,8 @@ const navLinks = [
 ];
 
 export function Footer() {
+  const { isSignedIn } = useAuth();
+  
   return (
     <footer className="mt-auto" style={{ borderTop: '1px solid rgba(96,165,250,0.1)', background: 'rgba(6,8,18,0.95)' }}>
 
@@ -117,17 +120,20 @@ export function Footer() {
               Important Links
             </h3>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="transition-colors duration-200 hover:text-primary"
-                    style={{ color: 'rgba(232,238,255,0.5)' }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {navLinks.map((link) => {
+                if (link.href === '/dashboard' && !isSignedIn) return null;
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="transition-colors duration-200 hover:text-primary"
+                      style={{ color: 'rgba(232,238,255,0.5)' }}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
