@@ -27,5 +27,8 @@ router.patch('/:id/status', adminAuth, requireRole('admin', 'super_admin', 'even
 router.patch('/:id/attendance', adminAuth, requireRole('admin', 'super_admin', 'event_manager', 'volunteer'), (req, res, next) =>
   reg.toggleAttendance(req, res).catch(next)
 );
+router.get('/:id/admin-ticket', adminAuth, requireRole('admin', 'super_admin'), (req, res, next) =>
+  reg.adminDownloadTicket(req, res).catch(next)
+);
 
 export default router;

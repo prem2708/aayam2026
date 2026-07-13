@@ -17,7 +17,14 @@ export async function getDashboard(req: AdminAuthRequest, res: import('express')
         select: {
           event: {
             select: {
+              is_team_event: true,
               amount: true,
+              per_person_amount: true,
+            },
+          },
+          team: {
+            select: {
+              members: true,
             },
           },
         },
@@ -25,7 +32,24 @@ export async function getDashboard(req: AdminAuthRequest, res: import('express')
     ]);
 
     const revenue = confirmedRegistrations.reduce((sum, reg) => {
-      return sum + (reg.event?.amount || 0);
+      const event = reg.event;
+      if (!event) return sum;
+      let cost = event.amount || 0;
+      if (event.is_team_event && reg.team) {
+        const baseAmount = event.per_person_amount || event.amount || 0;
+        let membersCount = 0;
+        if (Array.isArray(reg.team.members)) {
+          membersCount = reg.team.members.length;
+        } else if (typeof reg.team.members === 'string') {
+          try {
+            membersCount = JSON.parse(reg.team.members).length;
+          } catch (e) {
+            membersCount = 0;
+          }
+        }
+        cost = baseAmount * (membersCount + 1);
+      }
+      return sum + cost;
     }, 0);
 
     res.json({

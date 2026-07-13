@@ -43,6 +43,7 @@ export interface Event {
   max_team_size: number;
   participant_cap?: number;
   amount?: number;
+  per_person_amount?: number;
   status: string;
   is_featured: boolean;
   created_at?: string;

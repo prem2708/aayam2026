@@ -63,6 +63,9 @@ export async function registerForEvent(req: AuthRequest, res: import('express').
     if (!team_name) throw new AppError(400, 'Team name required for team events');
     const members = team_members || [];
     const totalSize = members.length + 1; // leader + teammates
+    if (event.min_team_size && totalSize < event.min_team_size) {
+      throw new AppError(400, `Team size must be at least ${event.min_team_size} members`);
+    }
     if (totalSize > event.max_team_size) {
       throw new AppError(400, `Team size cannot exceed ${event.max_team_size} members`);
     }
@@ -342,8 +345,9 @@ export async function scanQr(req: AdminAuthRequest, res: import('express').Respo
       ]
     },
     include: {
-      event: { select: { title: true } },
-      user: { select: { name: true, email: true, college: true } },
+      event: { select: { title: true, venue: true, event_start_at: true } },
+      user: { select: { name: true, email: true, college: true, phone: true, branch: true, year: true } },
+      team: { select: { name: true, members: true } },
     },
   }) as any;
 
@@ -351,13 +355,14 @@ export async function scanQr(req: AdminAuthRequest, res: import('express').Respo
   if (reg.status !== 'confirmed') throw new AppError(400, 'Registration not confirmed');
 
   if (reg.attended_at) {
-    const { event, user, ...rest } = reg;
+    const { event, user, team, ...rest } = reg;
     return res.json({
       success: true,
       data: {
         ...rest,
         events: event,
         users: user,
+        teams: team,
         duplicate: true,
         message: 'Already checked in',
       },
@@ -369,18 +374,20 @@ export async function scanQr(req: AdminAuthRequest, res: import('express').Respo
       where: { id: reg.id },
       data: { attended_at: new Date() },
       include: {
-        event: { select: { title: true } },
-        user: { select: { name: true, email: true, college: true } },
+        event: { select: { title: true, venue: true, event_start_at: true } },
+        user: { select: { name: true, email: true, college: true, phone: true, branch: true, year: true } },
+        team: { select: { name: true, members: true } },
       },
     }) as any;
 
-    const { event, user, ...rest } = data;
+    const { event, user, team, ...rest } = data;
     res.json({
       success: true,
       data: {
         ...rest,
         events: event,
         users: user,
+        teams: team,
         duplicate: false,
       },
     });
@@ -477,4 +484,47 @@ export async function toggleAttendance(req: AdminAuthRequest, res: import('expre
   } catch (error: any) {
     throw new AppError(400, error.message);
   }
+}
+
+export async function adminDownloadTicket(req: AdminAuthRequest, res: import('express').Response) {
+  const regId = req.params.id as string;
+  const reg = await prisma.registrations.findFirst({
+    where: { id: regId },
+    include: {
+      event: {
+        select: { title: true, event_start_at: true, venue: true, category: true },
+      },
+      user: {
+        select: { name: true, college: true, email: true, phone: true, branch: true },
+      },
+      team: {
+        select: { name: true, members: true },
+      },
+    },
+  }) as any;
+
+  if (!reg) throw new AppError(404, 'Registration not found');
+  if (reg.status !== 'confirmed') throw new AppError(400, 'Ticket available only for confirmed registrations');
+
+  const membersList = Array.isArray(reg.team?.members) ? (reg.team.members as string[]) : [];
+
+  const pdf = await generateTicketPdf({
+    eventTitle: reg.event.title,
+    userName: reg.user.name,
+    college: reg.user.college,
+    qrToken: reg.qr_token,
+    eventDate: reg.event.event_start_at.toLocaleString('en-IN'),
+    venue: reg.event.venue || undefined,
+    userEmail: reg.user.email,
+    userPhone: reg.user.phone || undefined,
+    userBranch: reg.user.branch || undefined,
+    teamName: reg.team?.name || undefined,
+    teamMembers: membersList.length > 0 ? membersList : undefined,
+    category: reg.event.category,
+    registrationNo: reg.registration_no || undefined,
+  });
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=ticket-${reg.id}.pdf`);
+  res.send(pdf);
 }

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, Info, IndianRupee, Gift } from 'lucide-react';
 import { useState } from 'react';
 import { adminFetch } from '@/lib/api';
 import { ImageUpload } from '@/components/ImageUpload';
@@ -25,14 +25,11 @@ export default function NewEventPage() {
     { position: '3rd Place', amount: '' },
   ]);
 
-  const addPrizeRow = () => {
-    setPrizesList([...prizesList, { position: '', amount: '' }]);
-  };
+  // Paid / Free toggle
+  const [isPaid, setIsPaid] = useState(false);
 
-  const removePrizeRow = (index: number) => {
-    setPrizesList(prizesList.filter((_, i) => i !== index));
-  };
-
+  const addPrizeRow = () => setPrizesList([...prizesList, { position: '', amount: '' }]);
+  const removePrizeRow = (index: number) => setPrizesList(prizesList.filter((_, i) => i !== index));
   const updatePrizeRow = (index: number, field: 'position' | 'amount', value: string) => {
     const newList = [...prizesList];
     newList[index][field] = value;
@@ -44,12 +41,16 @@ export default function NewEventPage() {
       title: '', category: 'technical', description: '', rules: '', venue: '', whatsapp_link: '',
       event_start_at: '', event_end_at: '', reg_start_at: '', reg_end_at: '',
       is_team_event: false, min_team_size: 1, max_team_size: 4, status: 'draft',
-      is_featured: false, requires_approval: false, allow_cancellation: true, participant_cap: '', amount: '',
+      is_featured: false, requires_approval: false, allow_cancellation: true,
+      participant_cap: '', per_person_amount: '',
       bank_name: '', bank_account_no: '', bank_ifsc: '', bank_recipient_name: '',
     },
   });
 
   const isTeam = watch('is_team_event');
+  const minTeamSize = Number(watch('min_team_size')) || 1;
+  const maxTeamSize = Number(watch('max_team_size')) || 1;
+  const perPersonAmount = Number(watch('per_person_amount')) || 0;
 
   const formatToIso = (dateStr: string) => {
     if (!dateStr || !dateStr.trim()) return '';
@@ -73,8 +74,8 @@ export default function NewEventPage() {
         poster_file_id: poster.fileId || null,
         banner_url: banner.url || null,
         banner_file_id: banner.fileId || null,
-        payment_qr_url: paymentQr.url || null,
-        payment_qr_file_id: paymentQr.fileId || null,
+        payment_qr_url: isPaid ? (paymentQr.url || null) : null,
+        payment_qr_file_id: isPaid ? (paymentQr.fileId || null) : null,
         event_start_at: formatToIso(data.event_start_at),
         event_end_at: formatToIso(data.event_end_at),
         reg_start_at: formatToIso(data.reg_start_at),
@@ -83,14 +84,16 @@ export default function NewEventPage() {
         is_featured: Boolean(data.is_featured),
         requires_approval: Boolean(data.requires_approval),
         allow_cancellation: Boolean(data.allow_cancellation),
-        min_team_size: 1,
-        max_team_size: Math.max(0, Number(data.max_team_size)),
+        min_team_size: Math.max(1, Number(data.min_team_size) || 1),
+        max_team_size: Math.max(1, Number(data.max_team_size)),
         participant_cap: data.participant_cap ? Math.max(0, Number(data.participant_cap)) : null,
-        amount: data.amount !== undefined && data.amount !== null && data.amount !== '' ? Number(data.amount) : null,
-        bank_name: data.bank_name || null,
-        bank_account_no: data.bank_account_no || null,
-        bank_ifsc: data.bank_ifsc || null,
-        bank_recipient_name: data.bank_recipient_name || null,
+        // amount is null for free events; for paid events it's the per_person_amount (keeps backward compat)
+        amount: isPaid && perPersonAmount > 0 ? perPersonAmount : null,
+        per_person_amount: isPaid && data.per_person_amount !== '' ? Number(data.per_person_amount) : null,
+        bank_name: isPaid ? (data.bank_name || null) : null,
+        bank_account_no: isPaid ? (data.bank_account_no || null) : null,
+        bank_ifsc: isPaid ? (data.bank_ifsc || null) : null,
+        bank_recipient_name: isPaid ? (data.bank_recipient_name || null) : null,
         whatsapp_link: data.whatsapp_link || null,
         prizes: prizesRecord,
       };
@@ -115,6 +118,7 @@ export default function NewEventPage() {
     <div className="max-w-3xl pb-12">
       <h1 className="text-2xl font-bold mb-6">Create Event</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
         {/* Core Info */}
         <div className="glass rounded-xl p-6 space-y-4">
           <h2 className="text-lg font-semibold text-violet-400">Basic Information</h2>
@@ -125,26 +129,18 @@ export default function NewEventPage() {
           <div>
             <label className="text-sm text-slate-300 mb-1 block">Description</label>
             <textarea {...register('description', { required: true })} className="hidden" />
-            <RichTextEditor
-              value={watch('description')}
-              onChange={(val) => setValue('description', val)}
-              placeholder="Event description..."
-            />
+            <RichTextEditor value={watch('description')} onChange={(val) => setValue('description', val)} placeholder="Event description..." />
           </div>
           <div>
             <label className="text-sm text-slate-300 mb-1 block">Rules</label>
             <textarea {...register('rules')} className="hidden" />
-            <RichTextEditor
-              value={watch('rules')}
-              onChange={(val) => setValue('rules', val)}
-              placeholder="Event rules & guidelines..."
-            />
+            <RichTextEditor value={watch('rules')} onChange={(val) => setValue('rules', val)} placeholder="Event rules & guidelines..." />
           </div>
           <div><label className="text-sm text-slate-300 mb-1 block">Venue</label><input {...register('venue')} className={inputClass} /></div>
           <div><label className="text-sm text-slate-300 mb-1 block">WhatsApp Group Link</label><input type="url" {...register('whatsapp_link')} placeholder="https://chat.whatsapp.com/..." className={inputClass} /></div>
         </div>
 
-        {/* Media / Images */}
+        {/* Media */}
         <div className="glass rounded-xl p-6 space-y-4">
           <h2 className="text-lg font-semibold text-violet-400">Event Media</h2>
           <div className="grid gap-6 md:grid-cols-2">
@@ -153,42 +149,26 @@ export default function NewEventPage() {
           </div>
         </div>
 
-        {/* Dates */}
+        {/* Schedule & Participant Settings */}
         <div className="glass rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-violet-400">Event Schedule & Registrations</h2>
+          <h2 className="text-lg font-semibold text-violet-400">Event Schedule &amp; Registrations</h2>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="text-sm text-slate-300 mb-1 block">Event Start</label><input type="datetime-local" {...register('event_start_at', { required: true })} className={inputClass} /></div>
             <div><label className="text-sm text-slate-300 mb-1 block">Event End</label><input type="datetime-local" {...register('event_end_at', { required: true })} className={inputClass} /></div>
             <div><label className="text-sm text-slate-300 mb-1 block">Reg Opens</label><input type="datetime-local" {...register('reg_start_at', { required: true })} className={inputClass} /></div>
             <div><label className="text-sm text-slate-300 mb-1 block">Reg Closes</label><input type="datetime-local" {...register('reg_end_at', { required: true })} className={inputClass} /></div>
           </div>
+
+          {/* Event Type */}
           <div className="flex flex-col gap-4 pt-2">
             <div className="flex items-center gap-6">
               <span className="text-sm text-slate-400">Event Type:</span>
               <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                <input
-                  type="radio"
-                  name="event_type"
-                  checked={!isTeam}
-                  onChange={() => {
-                    setValue('is_team_event', false);
-                    setValue('min_team_size', 1);
-                    setValue('max_team_size', 1);
-                  }}
-                />
+                <input type="radio" name="event_type" checked={!isTeam} onChange={() => { setValue('is_team_event', false); setValue('min_team_size', 1); setValue('max_team_size', 1); }} />
                 Solo (1 Member)
               </label>
               <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                <input
-                  type="radio"
-                  name="event_type"
-                  checked={isTeam}
-                  onChange={() => {
-                    setValue('is_team_event', true);
-                    setValue('min_team_size', 1);
-                    setValue('max_team_size', 4);
-                  }}
-                />
+                <input type="radio" name="event_type" checked={isTeam} onChange={() => { setValue('is_team_event', true); setValue('min_team_size', 2); setValue('max_team_size', 4); }} />
                 Team Event
               </label>
             </div>
@@ -197,9 +177,20 @@ export default function NewEventPage() {
               <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer"><input type="checkbox" {...register('requires_approval')} /> Requires Approval</label>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div><label className="text-sm text-slate-300 mb-1 block">Max Team</label><input type="number" min={0} {...register('max_team_size')} className={inputClass} disabled={!isTeam} /></div>
-            <div><label className="text-sm text-slate-300 mb-1 block">Cap</label><input type="number" min={0} {...register('participant_cap')} className={inputClass} placeholder="Unlimited" /></div>
+
+          <div className="grid grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm text-slate-300 mb-1 block">Min Team Size</label>
+              <input type="number" min={1} {...register('min_team_size')} className={inputClass} disabled={!isTeam} placeholder="Min members" />
+            </div>
+            <div>
+              <label className="text-sm text-slate-300 mb-1 block">Max Team Size</label>
+              <input type="number" min={0} {...register('max_team_size')} className={inputClass} disabled={!isTeam} />
+            </div>
+            <div>
+              <label className="text-sm text-slate-300 mb-1 block">Cap (max registrations)</label>
+              <input type="number" min={0} {...register('participant_cap')} className={inputClass} placeholder="Unlimited" />
+            </div>
             <div>
               <label className="text-sm text-slate-300 mb-1 block">Status</label>
               <select {...register('status')} className="w-full rounded-lg bg-slate-900 border border-slate-700 px-4 py-2.5 text-sm text-slate-200 capitalize">
@@ -211,19 +202,14 @@ export default function NewEventPage() {
           </div>
         </div>
 
-        {/* Prizes Section */}
+        {/* Prizes */}
         <div className="glass rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-violet-400">Prizes & Positions</h2>
-            <button
-              type="button"
-              onClick={addPrizeRow}
-              className="inline-flex items-center gap-1 text-xs font-semibold rounded-lg bg-violet-600/20 text-violet-300 border border-violet-500/30 px-3 py-1.5 hover:bg-violet-600/30 transition-all cursor-pointer"
-            >
+            <h2 className="text-lg font-semibold text-violet-400">Prizes &amp; Positions</h2>
+            <button type="button" onClick={addPrizeRow} className="inline-flex items-center gap-1 text-xs font-semibold rounded-lg bg-violet-600/20 text-violet-300 border border-violet-500/30 px-3 py-1.5 hover:bg-violet-600/30 transition-all cursor-pointer">
               <Plus className="h-3.5 w-3.5" /> Add Position
             </button>
           </div>
-          
           {prizesList.length === 0 ? (
             <p className="text-sm text-slate-500">No prizes added yet.</p>
           ) : (
@@ -232,32 +218,14 @@ export default function NewEventPage() {
                 <div key={idx} className="flex gap-3 items-center">
                   <div className="flex-1">
                     <label className="text-xs text-slate-400 mb-1 block">Position / Award</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 1st Place"
-                      value={item.position}
-                      onChange={(e) => updatePrizeRow(idx, 'position', e.target.value)}
-                      className={inputClass}
-                      required
-                    />
+                    <input type="text" placeholder="e.g. 1st Place" value={item.position} onChange={(e) => updatePrizeRow(idx, 'position', e.target.value)} className={inputClass} required />
                   </div>
                   <div className="flex-1">
                     <label className="text-xs text-slate-400 mb-1 block">Reward Amount / Value</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. ₹10,000"
-                      value={item.amount}
-                      onChange={(e) => updatePrizeRow(idx, 'amount', e.target.value)}
-                      className={inputClass}
-                      required
-                    />
+                    <input type="text" placeholder="e.g. ₹10,000" value={item.amount} onChange={(e) => updatePrizeRow(idx, 'amount', e.target.value)} className={inputClass} required />
                   </div>
                   <div className="pt-5">
-                    <button
-                      type="button"
-                      onClick={() => removePrizeRow(idx)}
-                      className="rounded-lg border border-red-500/30 p-2.5 text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
-                    >
+                    <button type="button" onClick={() => removePrizeRow(idx)} className="rounded-lg border border-red-500/30 p-2.5 text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -267,19 +235,78 @@ export default function NewEventPage() {
           )}
         </div>
 
-        {/* Payment Methods */}
-        <div className="glass rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-violet-400">Payment Details (Optional)</h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            <ImageUpload label="Payment QR Code" valueUrl={paymentQr.url} valueFileId={paymentQr.fileId} onChange={(url, fileId) => setPaymentQr({ url, fileId })} folder="/payment-qrs" />
-            <div className="space-y-4">
-              <div><label className="text-sm text-slate-300 mb-1 block">Amount</label><input type="number" step="1" min={0} {...register('amount')} className={inputClass} placeholder="Optional" /></div>
-              <div><label className="text-sm text-slate-300 mb-1 block">Bank Name</label><input {...register('bank_name')} className={inputClass} placeholder="e.g. State Bank of India" /></div>
-              <div><label className="text-sm text-slate-300 mb-1 block">Account Number</label><input {...register('bank_account_no')} className={inputClass} placeholder="e.g. 10002934823" /></div>
-              <div><label className="text-sm text-slate-300 mb-1 block">IFSC Code</label><input {...register('bank_ifsc')} className={inputClass} placeholder="e.g. SBIN0001234" /></div>
-              <div><label className="text-sm text-slate-300 mb-1 block">Recipient Name</label><input {...register('bank_recipient_name')} className={inputClass} placeholder="e.g. TechFest Committee" /></div>
+        {/* Payment Details */}
+        <div className="glass rounded-xl p-6 space-y-5">
+          <h2 className="text-lg font-semibold text-violet-400">Payment &amp; Entry</h2>
+
+          {/* Paid / Free Toggle */}
+          <div>
+            <label className="text-sm text-slate-300 mb-2 block font-medium">Entry Type</label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsPaid(false)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                  !isPaid
+                    ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.15)]'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                <Gift className="h-4 w-4" /> Free Entry
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPaid(true)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                  isPaid
+                    ? 'bg-violet-600/20 border-violet-500/50 text-violet-300 shadow-[0_0_12px_rgba(139,92,246,0.15)]'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                <IndianRupee className="h-4 w-4" /> Paid Entry
+              </button>
             </div>
           </div>
+
+          {isPaid && (
+            <div className="space-y-4 pt-1 border-t border-slate-800">
+              {/* Per Person Amount */}
+              <div>
+                <label className="text-sm text-slate-300 mb-1 block flex items-center gap-1.5">
+                  Per Person Amount (₹)
+                  <span title="Total charged = Per Person Amount × number of members in the team" className="cursor-help">
+                    <Info className="h-3.5 w-3.5 text-slate-500" />
+                  </span>
+                </label>
+                <input type="number" step="1" min={0} {...register('per_person_amount')} className={inputClass} placeholder="e.g. 150 per person" />
+                {/* Live preview */}
+                {perPersonAmount > 0 && (
+                  <div className="mt-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 px-3 py-2 text-xs text-cyan-300 space-y-0.5">
+                    <p className="font-semibold text-cyan-200 mb-1">💡 Amount Preview</p>
+                    {isTeam
+                      ? Array.from({ length: Math.max(0, maxTeamSize - minTeamSize + 1) }, (_, i) => minTeamSize + i).map((n) => (
+                          <p key={n} className="font-mono">
+                            {n} member{n > 1 ? 's' : ''} × ₹{perPersonAmount} = <span className="font-bold text-white">₹{n * perPersonAmount}</span>
+                          </p>
+                        ))
+                      : <p className="font-mono">1 participant × ₹{perPersonAmount} = <span className="font-bold text-white">₹{perPersonAmount}</span></p>
+                    }
+                  </div>
+                )}
+              </div>
+
+              {/* Payment QR */}
+              <div className="grid gap-6 md:grid-cols-2">
+                <ImageUpload label="Payment QR Code" valueUrl={paymentQr.url} valueFileId={paymentQr.fileId} onChange={(url, fileId) => setPaymentQr({ url, fileId })} folder="/payment-qrs" />
+                <div className="space-y-3">
+                  <div><label className="text-sm text-slate-300 mb-1 block">Bank Name</label><input {...register('bank_name')} className={inputClass} placeholder="e.g. State Bank of India" /></div>
+                  <div><label className="text-sm text-slate-300 mb-1 block">Account Number</label><input {...register('bank_account_no')} className={inputClass} placeholder="e.g. 10002934823" /></div>
+                  <div><label className="text-sm text-slate-300 mb-1 block">IFSC Code</label><input {...register('bank_ifsc')} className={inputClass} placeholder="e.g. SBIN0001234" /></div>
+                  <div><label className="text-sm text-slate-300 mb-1 block">Recipient Name</label><input {...register('bank_recipient_name')} className={inputClass} placeholder="e.g. TechFest Committee" /></div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <button type="submit" disabled={loading} className="w-full rounded-xl bg-violet-600 py-3.5 font-semibold text-white hover:bg-violet-500 disabled:opacity-50 flex items-center justify-center gap-2">

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin, Users, Trophy, Download, Loader2, X, Sparkles, CheckCircle2, Ticket, QrCode, ClipboardList, Info, Sparkle } from 'lucide-react';
+import { Calendar, MapPin, Users, Trophy, Download, Loader2, X, Sparkles, CheckCircle2, Ticket, QrCode, ClipboardList, Info, Sparkle, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Event, UserProfile, apiFetch } from '@/lib/api';
 import { CATEGORY_LABELS, CATEGORY_COLORS, STATUS_COLORS, formatDate, cn } from '@/lib/utils';
@@ -40,10 +40,11 @@ export function EventDetailClient({ event }: { event: Event }) {
   const [mode, setMode] = useState<'solo' | 'create' | 'join'>(
     event.is_team_event ? 'create' : 'solo'
   );
-  
-  const [teammates, setTeammates] = useState<string[]>(
-    Array(Math.max(0, event.max_team_size - 1)).fill('')
-  );
+  const minExtras = Math.max(0, (event.min_team_size ?? 1) - 1);
+  const maxExtras = Math.max(0, event.max_team_size - 1);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(!event.is_team_event);
+  const [teamConfirmed, setTeamConfirmed] = useState(!event.is_team_event);
+  const [teammates, setTeammates] = useState<string[]>([]);
   const [paymentProof, setPaymentProof] = useState({ url: '', fileId: '' });
   const [transactionId, setTransactionId] = useState('');
   const [uploadingProof, setUploadingProof] = useState(false);
@@ -62,6 +63,7 @@ export function EventDetailClient({ event }: { event: Event }) {
   });
 
   const gradient = CATEGORY_COLORS[event.category] || 'from-violet-500 to-purple-500';
+  const baseAmount = event.per_person_amount || event.amount || 0;
   const regOpen = event.status === 'open' && new Date() >= new Date(event.reg_start_at) && new Date() <= new Date(event.reg_end_at);
 
   useEffect(() => {
@@ -154,12 +156,21 @@ export function EventDetailClient({ event }: { event: Event }) {
     }
 
     if (event.is_team_event) {
+      if (!teamConfirmed) {
+        toast.error('Please confirm your team members first by clicking "Done Adding Members".');
+        return;
+      }
       if (!teamName.trim()) {
         toast.error('Team Name is required');
         return;
       }
       const activeTeammates = teammates.filter(Boolean);
       const totalSize = activeTeammates.length + 1;
+      const minSize = event.min_team_size ?? 1;
+      if (totalSize < minSize) {
+        toast.error(`Your team must have at least ${minSize} members (including you).`);
+        return;
+      }
       if (totalSize > event.max_team_size) {
         toast.error(`Your team can have at most ${event.max_team_size} members (including you).`);
         return;
@@ -230,12 +241,21 @@ export function EventDetailClient({ event }: { event: Event }) {
     }
 
     if (event.is_team_event) {
+      if (!teamConfirmed) {
+        toast.error('Please confirm your team members first by clicking "Done Adding Members".');
+        return;
+      }
       if (!teamName.trim()) {
         toast.error('Team Name is required');
         return;
       }
       const activeTeammates = teammates.filter(Boolean);
       const totalSize = activeTeammates.length + 1;
+      const minSize = event.min_team_size ?? 1;
+      if (totalSize < minSize) {
+        toast.error(`Your team must have at least ${minSize} members (including you).`);
+        return;
+      }
       if (totalSize > event.max_team_size) {
         toast.error(`Your team can have at most ${event.max_team_size} members (including you).`);
         return;
@@ -427,15 +447,17 @@ export function EventDetailClient({ event }: { event: Event }) {
                 </h2>
                 
                 {/* Entry fee amount summary */}
-                {event.amount && event.amount > 0 && (
+                {(event.amount || event.per_person_amount) ? (
                   <div className="mb-6 p-4.5 bg-violet-950/30 border border-violet-500/25 rounded-2xl flex justify-between items-center shadow-[0_0_15px_rgba(139,92,246,0.1)]">
                     <div>
                       <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block">Total Entry Fee</span>
                       <span className="text-slate-300 text-xs mt-0.5 block">Transfer this exact amount to qualify</span>
                     </div>
-                    <span className="text-2xl font-black text-violet-300 font-heading">₹{event.amount}</span>
+                    <span className="text-2xl font-black text-violet-300 font-heading">
+                      ₹{event.is_team_event ? (teammates.length + 1) * baseAmount : (event.amount || 0)}
+                    </span>
                   </div>
-                )}
+                ) : null}
 
                 <p className="text-sm text-slate-400 mb-6 leading-relaxed">
                   Please complete your payment transfer via UPI QR scan or Bank Transfer, and upload your transaction receipt screenshot below.
@@ -483,39 +505,134 @@ export function EventDetailClient({ event }: { event: Event }) {
               
               {/* Entry Fee displayed inside registration box */}
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-900">
-                <span className="text-slate-400 text-sm">Entry Fee</span>
-                <span className="text-lg font-black text-white font-heading">
-                  {event.amount && event.amount > 0 ? `₹${event.amount}` : 'Free Entry'}
-                </span>
+                <span className="text-slate-400 text-sm">Entry Fee Status</span>
+                <div className="text-right">
+                  {event.per_person_amount && event.per_person_amount > 0 || (event.amount && event.amount > 0) ? (
+                    <span className="text-lg font-black text-violet-300 font-heading">Paid</span>
+                  ) : (
+                    <span className="text-lg font-black text-emerald-400 font-heading">Free</span>
+                  )}
+                </div>
               </div>
 
               {regOpen ? (
                 <>
                   {event.is_team_event && (
-                    <div className="space-y-3.5 mb-5">
+                    <div className="space-y-3 mb-5">
+                      {/* Header */}
                       <div className="flex justify-between items-center text-[10px] text-slate-500 px-1 font-bold uppercase tracking-wider">
                         <span>Team Requirements</span>
-                        <span className="font-semibold text-violet-400">Max {event.max_team_size} members (Inc. Leader)</span>
+                        <span className="font-semibold text-violet-400">
+                          {event.min_team_size ?? 1}–{event.max_team_size} members (inc. you)
+                        </span>
                       </div>
-                      <input 
-                        value={teamName} 
-                        onChange={(e) => setTeamName(e.target.value)} 
-                        placeholder="Assign Team Name" 
-                        className={inputClass} 
-                      />
-                      {teammates.map((member, idx) => (
-                        <input
-                           key={idx}
-                           value={member}
-                           onChange={(e) => {
-                             const copy = [...teammates];
-                             copy[idx] = e.target.value;
-                             setTeammates(copy);
-                           }}
-                           placeholder={`Teammate ${idx + 2} Full Name`}
-                           className={inputClass}
-                        />
-                      ))}
+
+                      {!isCreatingTeam ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsCreatingTeam(true)}
+                          className="w-full rounded-xl border border-dashed border-violet-500/40 py-3.5 text-sm font-bold text-violet-400 hover:bg-violet-500/10 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Users className="h-4 w-4" /> Create Team
+                        </button>
+                      ) : !teamConfirmed ? (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                          {/* Team Name */}
+                          <input
+                            value={teamName}
+                            onChange={(e) => setTeamName(e.target.value)}
+                            placeholder="Enter Team Name"
+                            className={inputClass}
+                          />
+
+                          {/* Dynamic teammate slots */}
+                          {teammates.map((member, idx) => (
+                            <div key={idx} className="flex gap-2">
+                              <input
+                                value={member}
+                                onChange={(e) => {
+                                  const copy = [...teammates];
+                                  copy[idx] = e.target.value;
+                                  setTeammates(copy);
+                                }}
+                                placeholder={`Teammate ${idx + 2} Full Name`}
+                                className={inputClass}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setTeammates(teammates.filter((_, i) => i !== idx))}
+                                className="shrink-0 rounded-xl border border-red-500/30 px-3 text-red-400 hover:bg-red-500/10 transition-all text-xs font-bold"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+
+                          {/* Add Member button */}
+                          {teammates.length < maxExtras && (
+                            <button
+                              type="button"
+                              onClick={() => setTeammates([...teammates, ''])}
+                              className="w-full rounded-xl border border-dashed border-violet-500/40 py-2.5 text-xs font-bold text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/70 transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <Plus className="h-3.5 w-3.5" /> Add Member
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const active = teammates.filter(Boolean);
+                              const totalSize = active.length + 1;
+                              const minSize = event.min_team_size ?? 1;
+                              if (totalSize < minSize) {
+                                toast.error(`Your team must have at least ${minSize} members.`);
+                                return;
+                              }
+                              if (!teamName.trim()) {
+                                toast.error('Team Name is required before proceeding.');
+                                return;
+                              }
+                              setTeamConfirmed(true);
+                            }}
+                            className="w-full rounded-xl bg-emerald-600/20 border border-emerald-500/40 py-3 text-sm font-bold text-emerald-400 hover:bg-emerald-600/30 transition-all mt-2"
+                          >
+                            Done Adding Members
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 animate-in fade-in duration-300">
+                          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                            <div className="flex justify-between items-center mb-3">
+                              <h4 className="font-bold text-white text-sm">{teamName || 'Your Team'}</h4>
+                              <button
+                                type="button"
+                                onClick={() => setTeamConfirmed(false)}
+                                className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+                              >
+                                Edit Members
+                              </button>
+                            </div>
+                            <div className="text-xs text-slate-400">
+                              Members: You {teammates.filter(Boolean).map(m => `, ${m}`)}
+                            </div>
+                          </div>
+
+                          {/* Explicit Amount to Pay box */}
+                          {baseAmount > 0 && (
+                            <div className="rounded-xl bg-violet-950/30 border border-violet-500/20 px-4 py-3 flex flex-col gap-2 shadow-inner mt-4">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">Members Count</span>
+                                <span className="text-[11px] text-slate-400">{teammates.length + 1} member{teammates.length + 1 > 1 ? 's' : ''} × ₹{baseAmount}</span>
+                              </div>
+                              <div className="flex justify-between items-center border-t border-violet-500/10 pt-2">
+                                <span className="text-sm font-bold text-white">You have to pay:</span>
+                                <span className="text-xl font-black text-violet-300 font-heading">₹{(teammates.length + 1) * baseAmount}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                   

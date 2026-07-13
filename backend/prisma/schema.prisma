@@ -107,9 +107,11 @@ model events {
   is_team_event      Boolean         @default(false)
   min_team_size      Int             @default(1) @db.SmallInt
   max_team_size      Int             @default(1) @db.SmallInt
-  participant_cap    Int?
-  amount             Int?
-  requires_approval  Boolean         @default(false)
+  participant_cap     Int?
+  amount              Int?
+  per_person_amount   Int?
+  min_participants    Int             @default(1) @db.SmallInt
+  requires_approval   Boolean         @default(false)
   allow_cancellation Boolean         @default(true)
   is_featured        Boolean         @default(false)
   status             event_status    @default(draft)

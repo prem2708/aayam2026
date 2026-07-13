@@ -3,9 +3,9 @@
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Suspense, useState } from 'react';
-import { Download, Eye, Edit2, X, Loader2 } from 'lucide-react';
+import { Download, Eye, Edit2, X, Loader2, FileDown } from 'lucide-react';
 import { toast } from 'sonner';
-import { adminFetch, AdminEvent } from '@/lib/api';
+import { adminFetch, AdminEvent, getAdminToken } from '@/lib/api';
 import { formatDate, cn, STATUS_COLORS } from '@/lib/utils';
 
 function RegistrationsContent() {
@@ -21,6 +21,7 @@ function RegistrationsContent() {
     year: 1,
     phone: '',
   });
+  const [downloadingTicketId, setDownloadingTicketId] = useState<string | null>(null);
 
   const { data: events } = useQuery({
     queryKey: ['admin-events'],
@@ -93,10 +94,42 @@ function RegistrationsContent() {
     });
   };
 
+  async function downloadAdminTicket(regId: string) {
+    setDownloadingTicketId(regId);
+    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    const token = getAdminToken();
+    try {
+      const res = await fetch(`${base}/registrations/${regId}/admin-ticket`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let message = 'Failed to download ticket';
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed.error?.message || parsed.message || message;
+        } catch (_) {}
+        throw new Error(message);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ticket-${regId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Ticket downloaded!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to download ticket');
+    } finally {
+      setDownloadingTicketId(null);
+    }
+  }
+
   async function exportExcel() {
     if (!eventId) return;
     const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-    const token = localStorage.getItem('admin_token');
+    const token = getAdminToken();
     try {
       const res = await fetch(`${base}/events/${eventId}/export`, { 
         headers: { Authorization: `Bearer ${token}` } 
@@ -157,7 +190,7 @@ function RegistrationsContent() {
               <tr>
                 <th className="text-left p-3">Name</th>
                 <th className="text-left p-3">College</th>
-                <th className="text-left p-3">Team & Members</th>
+                <th className="text-left p-3">Team &amp; Members</th>
                 <th className="text-left p-3">Payment Proof</th>
                 <th className="text-left p-3">Status</th>
                 <th className="text-left p-3">Attendance</th>
@@ -170,6 +203,7 @@ function RegistrationsContent() {
                 const users = r.users as { id?: string; name?: string; email?: string; phone?: string; college?: string; branch?: string; year?: number } | undefined;
                 const teams = r.teams as { name?: string; members?: unknown } | undefined;
                 const membersList = Array.isArray(teams?.members) ? (teams.members as string[]) : [];
+                const isConfirmed = r.status === 'confirmed';
 
                 return (
                   <tr key={r.id as string} className="border-b border-slate-800/50 hover:bg-slate-800/30">
@@ -250,6 +284,22 @@ function RegistrationsContent() {
                         >
                           <Edit2 className="h-3.5 w-3.5" />
                         </button>
+
+                        {/* Download ticket (only for confirmed registrations) */}
+                        {isConfirmed && (
+                          <button
+                            onClick={() => downloadAdminTicket(r.id as string)}
+                            disabled={downloadingTicketId === r.id}
+                            className="inline-flex rounded-lg border border-cyan-700/40 p-1.5 hover:bg-cyan-800/20 text-cyan-400 transition-colors disabled:opacity-50"
+                            title="Download QR Ticket (PDF)"
+                          >
+                            {downloadingTicketId === r.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <FileDown className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        )}
                         
                         {r.status === 'pending' ? (
                           <>

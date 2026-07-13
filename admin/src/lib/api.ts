@@ -69,6 +69,8 @@ export interface AdminEvent {
   max_team_size: number;
   participant_cap?: number;
   amount?: number;
+  per_person_amount?: number;
+  min_participants?: number;
   is_featured: boolean;
   requires_approval: boolean;
   allow_cancellation: boolean;
