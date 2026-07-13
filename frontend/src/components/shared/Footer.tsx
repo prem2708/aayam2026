@@ -152,7 +152,7 @@ export function Footer() {
               aayamhackathon@gmail.com
             </a>
             <a
-              href="https://instagram.com/aayamtechfest"
+              href="https://www.instagram.com/aayamtechfest/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm mb-5 block hover:text-primary transition-colors"
@@ -188,7 +188,7 @@ export function Footer() {
               {/* WhatsApp */}
               <motion.a
                 whileHover={{ scale: 1.1, y: -2 }}
-                href="https://wa.me/919153449690"
+                href="https://chat.whatsapp.com/CVIpnDBljX6ACNZulkNabw"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-300"
