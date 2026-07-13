@@ -94,7 +94,7 @@ export default function HelpPage() {
             <div>
               <h3 className="font-bold text-white text-base mb-1">Discord Community</h3>
               <p className="text-xs text-slate-500 mb-3">Connect directly with event coordinators</p>
-              <a href="https://discord.gg/aayam2026" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-accent-secondary hover:text-accent-secondary/80 transition-colors">
+              <a href="https://discord.gg/BfsnnNwd5" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-accent-secondary hover:text-accent-secondary/80 transition-colors">
                 discord.gg/aayam2026
               </a>
             </div>
