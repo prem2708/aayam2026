@@ -5,6 +5,9 @@ import { Event } from '@/lib/api';
 export const metadata: Metadata = {
   title: 'Browse Events',
   description: 'Explore all technical, cultural, gaming, workshop, and hackathon events at Aayam TechFest 2026.',
+  verification: {
+    google: 'your-google-verification-code',
+  },
 };
 
 async function getEvents(): Promise<Event[]> {
