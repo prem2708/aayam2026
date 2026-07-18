@@ -119,7 +119,7 @@ export function EventCard({ event, index = 0 }: { event: Event; index?: number }
             }}
           >
             <Ticket className="h-3.5 w-3.5" />
-            {event.amount && event.amount > 0 ? `₹${event.amount}` : 'Free'}
+            {event.amount && event.amount > 0 ? 'Paid' : 'Free'}
           </span>
         </div>
 
