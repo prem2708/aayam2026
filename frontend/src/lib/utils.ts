@@ -15,7 +15,7 @@ export function formatDate(date: string | Date) {
   }).format(new Date(date));
 }
 
-export const FEST_DATE = new Date('2026-10-15T09:00:00');
+export const FEST_DATE = new Date('2026-08-12T09:00:00');
 
 export const CATEGORY_LABELS: Record<string, string> = {
   technical: 'Technical',

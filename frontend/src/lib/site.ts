@@ -21,6 +21,5 @@ export const PUBLIC_ROUTES = [
   { path: '', changeFrequency: 'daily' as const, priority: 1.0 },
   { path: '/about', changeFrequency: 'weekly' as const, priority: 0.8 },
   { path: '/events', changeFrequency: 'daily' as const, priority: 0.9 },
-  { path: '/winners', changeFrequency: 'weekly' as const, priority: 0.7 },
   { path: '/help', changeFrequency: 'weekly' as const, priority: 0.6 },
 ];

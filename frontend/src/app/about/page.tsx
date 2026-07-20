@@ -5,24 +5,22 @@ import { Sparkles, Users, Award, Shield, Target, Calendar, Flame } from 'lucide-
 import Image from 'next/image';
 
 const stats = [
-  { value: '5,000+', label: 'Total Attendees' },
-  { value: '25+', label: 'Competitions' },
-  { value: '₹2.5L+', label: 'Prize Pool' },
-  { value: '30+', label: 'Partner Institutions' },
+  { value: '0', label: 'Total Attendees' },
+  { value: '6', label: 'Competitions' },
+  { value: 'TBA', label: 'Prize Pool' },
+  { value: '5+', label: 'Partner Institutions' },
 ];
 
 const team = [
-  { name: 'Dr. Alok Verma', role: 'Faculty Coordinator', dept: 'Computer Science Dept' },
-  { name: 'Rahul Sen', role: 'Student Convener', dept: 'B.Tech CSE, 4th Year' },
-  { name: 'Priya Sharma', role: 'Technical Lead', dept: 'B.Tech IT, 4th Year' },
-  { name: 'Aditya Roy', role: 'Operations & Logistics', dept: 'B.Tech ECE, 3rd Year' },
+  { name: 'Mrs. Kirti Verma', role: 'Faculty Coordinator', dept: 'Computer Science Dept' },
+  { name: 'Prem Kumar', role: 'Organizer & Tech Lead', dept: 'B.Tech CSE, 4th Year' },
+  { name: 'Sudhanshu Kumar Agrawal', role: 'Organizer & Social Media Head', dept: 'Core Team' },
+  { name: 'Md Warsih Anasari', role: 'Organizer & Student Convener', dept: 'B.Tech CSE, 4th Year' },
 ];
 
 const timeline = [
-  { year: '2022', title: 'The Genesis', desc: 'Aayam was launched as an intra-college tech symposium with 4 events and 300 participants.' },
-  { year: '2023', title: 'Going State-Level', desc: 'Expanded invitation to state-wide colleges, introducing coding arenas and gaming zones.' },
-  { year: '2024', title: 'The Hybrid Wave', desc: 'Introduced virtual hackathons and international speaker sessions, hitting 2000+ registrations.' },
-  { year: '2026', title: 'The Quantum Leap', desc: 'Our biggest edition yet with next-gen robotic events, drone racing, and double the prize pools.' },
+  { year: '2025', title: 'The Genesis', desc: 'The first tech fest began, marking the start of our incredible journey.' },
+  { year: '2026', title: 'The Quantum Leap', desc: 'Our biggest edition yet, introducing exciting new events like eSports, Group Discussions, and much more.' },
 ];
 
 const containerVariants = {

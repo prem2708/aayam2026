@@ -6,7 +6,6 @@ const isPublicRoute = createRouteMatcher([
   '/robots.txt',
   '/events(.*)',
   '/verify(.*)',
-  '/winners(.*)',
   '/about(.*)',
   '/help(.*)',
   '/api/webhooks(.*)',

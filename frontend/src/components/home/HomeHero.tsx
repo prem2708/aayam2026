@@ -8,9 +8,9 @@ import { EventCard } from '@/components/events/EventCard';
 import { Event } from '@/lib/api';
 
 const stats = [
-  { icon: Zap,    label: 'Tech & Gaming Events', value: '50+',  color: '#60a5fa', glow: 'rgba(96,165,250,0.18)'  },
-  { icon: Users,  label: 'Active Registrations',  value: '10K+', color: '#a78bfa', glow: 'rgba(167,139,250,0.18)' },
-  { icon: Trophy, label: 'Grand Prize Pool',       value: '₹5L+', color: '#f59e0b', glow: 'rgba(245,158,11,0.18)' },
+  { icon: Zap,    label: 'Tech & Gaming Events', value: '6',  color: '#60a5fa', glow: 'rgba(96,165,250,0.18)'  },
+  { icon: Users,  label: 'Active Registrations',  value: '0', color: '#a78bfa', glow: 'rgba(167,139,250,0.18)' },
+  { icon: Trophy, label: 'Grand Prize Pool',       value: 'TBA', color: '#f59e0b', glow: 'rgba(245,158,11,0.18)' },
 ];
 
 const featureItems = [
@@ -63,7 +63,7 @@ export function HomeHero({ featured, announcements = [] }: { featured: Event[]; 
                   boxShadow: '0 0 20px rgba(245,158,11,0.1)',
                 }}>
                 <Calendar className="h-3.5 w-3.5" />
-                October 15–17, 2026
+                August 12–13, 2026
                 <span className="h-1.5 w-1.5 rounded-full bg-current animate-ring-pulse" />
               </span>
             </motion.div>
