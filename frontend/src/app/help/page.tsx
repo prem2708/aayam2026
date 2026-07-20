@@ -108,7 +108,7 @@ export default function HelpPage() {
               <h3 className="font-bold text-white text-base mb-1">Emergency Helplines</h3>
               <p className="text-xs text-slate-500 mb-3">Call us for immediate payment issues</p>
               <span className="text-sm font-semibold text-accent-secondary">
-                +91 98765 43210 / +91 91234 56789
+                +91 9153 449690 / +91 7857 900508
               </span>
             </div>
           </div>
