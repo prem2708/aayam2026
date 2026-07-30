@@ -219,7 +219,7 @@ function RegistrationsContent() {
                       <div>
                         <p className="font-semibold text-slate-200">{users?.name}</p>
                         {r.registration_no && <p className="text-xs text-violet-400 font-semibold">Reg ID: {r.registration_no}</p>}
-                        {users?.membership_no && <p className="text-xs text-emerald-400 font-semibold">Mem Reg: {users.membership_no}</p>}
+                        {users?.membership_no && <p className="text-xs text-emerald-400 font-semibold">Membership ID: {users.membership_no}</p>}
                         <p className="text-xs text-slate-500">{users?.email}</p>
                         {users?.phone && <p className="text-xs text-slate-500">{users.phone}</p>}
                       </div>
@@ -238,7 +238,7 @@ function RegistrationsContent() {
                           <p className="font-bold text-amber-300 text-xs">Team: {teams.name}</p>
                           <div className="text-[11px] text-slate-300">
                             <span className="font-semibold text-slate-400">Leader (M1): </span>
-                            {users?.name} {users?.membership_no ? <span className="text-emerald-400 font-mono font-semibold">({users.membership_no})</span> : ''}
+                            {users?.name} {users?.membership_no ? <span className="text-emerald-400 font-mono font-semibold">(Membership ID: {users.membership_no})</span> : ''}
                           </div>
                           {membersList.map((m: any, idx: number) => {
                             const mName = typeof m === 'object' && m !== null ? m.name : String(m);
@@ -246,7 +246,7 @@ function RegistrationsContent() {
                             return (
                               <div key={idx} className="text-[11px] text-slate-300">
                                 <span className="font-semibold text-slate-400">Member {idx + 2}: </span>
-                                {mName} {mMem ? <span className="text-emerald-400 font-mono font-semibold">({mMem})</span> : <span className="text-slate-500 font-mono">(No ID)</span>}
+                                {mName} {mMem ? <span className="text-emerald-400 font-mono font-semibold">(Membership ID: {mMem})</span> : <span className="text-slate-500 font-mono">(No ID)</span>}
                               </div>
                             );
                           })}

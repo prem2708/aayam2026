@@ -239,7 +239,7 @@ export default function ScannerPage() {
                       <p className="text-xs text-slate-500 uppercase tracking-wider">Participant</p>
                       <p className="text-base font-bold text-slate-100">{result.users?.name}</p>
                       {result.users?.membership_no && (
-                        <p className="text-xs font-semibold text-emerald-400">Mem Reg No: {result.users.membership_no}</p>
+                        <p className="text-xs font-semibold text-emerald-400">Membership ID: {result.users.membership_no}</p>
                       )}
                       <p className="text-xs text-slate-400">{result.users?.college}</p>
                       {result.users?.branch && (
@@ -281,7 +281,7 @@ export default function ScannerPage() {
                                 const memNo = typeof m === 'object' && m !== null ? m.membership_no : undefined;
                                 return (
                                   <span key={i} className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded px-1.5 py-0.5">
-                                    {name}{memNo ? ` (Reg: ${memNo})` : ''}
+                                    {name}{memNo ? ` (Membership ID: ${memNo})` : ''}
                                   </span>
                                 );
                               })}
