@@ -136,17 +136,44 @@ export async function generateTicketPdf(params: {
         .text(`Team: ${params.teamName}`, 35, detailsY + offset + 10);
 
       if (params.teamMembers && params.teamMembers.length > 0) {
-        const formattedMembers = params.teamMembers.map(m => {
-          if (typeof m === 'object' && m !== null) {
-            return m.membership_no ? `${m.name} (Mem ID: ${m.membership_no})` : m.name;
+        const parseMembers = (raw: any[]): Array<{ name: string; membership_no?: string }> => {
+          const res: Array<{ name: string; membership_no?: string }> = [];
+          for (const item of raw) {
+            if (!item) continue;
+            if (typeof item === 'object' && item !== null) {
+              const name = String(item.name || item.fullName || '').trim();
+              const membership_no = String(item.membership_no || item.membershipNo || '').trim();
+              if (name && name !== '[object Object]') res.push({ name, membership_no });
+            } else if (typeof item === 'string') {
+              const trimmed = item.trim();
+              if (!trimmed || trimmed === '[object Object]') continue;
+              if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                try {
+                  const parsed = JSON.parse(trimmed);
+                  if (parsed && typeof parsed === 'object') {
+                    const name = String(parsed.name || parsed.fullName || '').trim();
+                    const membership_no = String(parsed.membership_no || parsed.membershipNo || '').trim();
+                    if (name && name !== '[object Object]') { res.push({ name, membership_no }); continue; }
+                  }
+                } catch (_) {}
+              }
+              res.push({ name: trimmed, membership_no: '' });
+            }
           }
-          return String(m);
-        }).join(', ');
+          return res;
+        };
 
-        doc.fillColor('#94a3b8')
-          .fontSize(7)
-          .font('Helvetica')
-          .text(`Members: ${formattedMembers}`, 35, detailsY + offset + 20, { width: 295 });
+        const parsedList = parseMembers(params.teamMembers);
+        if (parsedList.length > 0) {
+          const formattedMembers = parsedList.map(m => {
+            return m.membership_no ? `${m.name} (Mem ID: ${m.membership_no})` : m.name;
+          }).join(', ');
+
+          doc.fillColor('#94a3b8')
+            .fontSize(7)
+            .font('Helvetica')
+            .text(`Members: ${formattedMembers}`, 35, detailsY + offset + 20, { width: 295 });
+        }
       }
     }
 

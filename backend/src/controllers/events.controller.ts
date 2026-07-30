@@ -291,18 +291,55 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
       'Attended',
       'UTR / Transaction ID',
     ];
-    const rows = data.map((r: any) => {
-      const membersList = Array.isArray(r.team?.members) ? r.team.members : [];
-      
-      const m2 = typeof membersList[0] === 'object' && membersList[0] !== null ? membersList[0] : (membersList[0] ? { name: String(membersList[0]), membership_no: '' } : null);
-      const m3 = typeof membersList[1] === 'object' && membersList[1] !== null ? membersList[1] : (membersList[1] ? { name: String(membersList[1]), membership_no: '' } : null);
-      const m4 = typeof membersList[2] === 'object' && membersList[2] !== null ? membersList[2] : (membersList[2] ? { name: String(membersList[2]), membership_no: '' } : null);
-
-      const formattedMembers = membersList.map((m: any, idx: number) => {
-        if (typeof m === 'object' && m !== null) {
-          return `Member ${idx + 2}: ${m.name}${m.membership_no ? ` (ID: ${m.membership_no})` : ''}`;
+    const parseTeamMembersList = (raw: any): Array<{ name: string; membership_no: string }> => {
+      if (!raw) return [];
+      let list: any[] = [];
+      if (Array.isArray(raw)) list = raw;
+      else if (typeof raw === 'string') {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) list = parsed;
+          else if (typeof parsed === 'object' && parsed !== null) list = [parsed];
+          else if (raw.trim() !== '[object Object]') list = [raw];
+        } catch (_) {
+          if (raw.trim() !== '[object Object]') list = [raw];
         }
-        return `Member ${idx + 2}: ${String(m)}`;
+      }
+      const res: Array<{ name: string; membership_no: string }> = [];
+      for (const item of list) {
+        if (!item) continue;
+        if (typeof item === 'object' && item !== null) {
+          const name = String(item.name || item.fullName || '').trim();
+          const membership_no = String(item.membership_no || item.membershipNo || '').trim();
+          if (name && name !== '[object Object]') res.push({ name, membership_no });
+        } else if (typeof item === 'string') {
+          const trimmed = item.trim();
+          if (!trimmed || trimmed === '[object Object]') continue;
+          if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+            try {
+              const parsed = JSON.parse(trimmed);
+              if (parsed && typeof parsed === 'object') {
+                const name = String(parsed.name || parsed.fullName || '').trim();
+                const membership_no = String(parsed.membership_no || parsed.membershipNo || '').trim();
+                if (name && name !== '[object Object]') { res.push({ name, membership_no }); continue; }
+              }
+            } catch (_) {}
+          }
+          res.push({ name: trimmed, membership_no: '' });
+        }
+      }
+      return res;
+    };
+
+    const rows = data.map((r: any) => {
+      const membersList = parseTeamMembersList(r.team?.members);
+      
+      const m2 = membersList[0] || null;
+      const m3 = membersList[1] || null;
+      const m4 = membersList[2] || null;
+
+      const formattedMembers = membersList.map((m, idx) => {
+        return `Member ${idx + 2}: ${m.name}${m.membership_no ? ` (ID: ${m.membership_no})` : ''}`;
       }).join('; ');
 
       return [

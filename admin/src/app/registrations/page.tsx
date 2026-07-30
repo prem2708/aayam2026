@@ -204,13 +204,56 @@ function RegistrationsContent() {
               {registrations.map((r: Record<string, any>) => {
                 const users = r.users as { id?: string; name?: string; email?: string; phone?: string; college?: string; branch?: string; year?: number; membership_no?: string } | undefined;
                 const teams = r.teams as { name?: string; members?: unknown } | undefined;
-                const membersList = Array.isArray(teams?.members) ? teams.members : [];
-                const formattedMembers = membersList.map((m: any) => {
-                  if (typeof m === 'object' && m !== null) {
-                    return m.membership_no ? `${m.name} (Reg: ${m.membership_no})` : m.name;
+                
+                // Robust parsing helper to avoid [object Object] and handle strings, JSON, objects
+                const parseMembers = (raw: any): Array<{ name: string; membership_no: string }> => {
+                  if (!raw) return [];
+                  let list: any[] = [];
+                  if (Array.isArray(raw)) {
+                    list = raw;
+                  } else if (typeof raw === 'string') {
+                    try {
+                      const parsed = JSON.parse(raw);
+                      if (Array.isArray(parsed)) list = parsed;
+                      else if (typeof parsed === 'object' && parsed !== null) list = [parsed];
+                      else if (raw.trim() !== '[object Object]') list = [raw];
+                    } catch (_) {
+                      if (raw.trim() !== '[object Object]') list = [raw];
+                    }
                   }
-                  return String(m);
-                });
+
+                  const result: Array<{ name: string; membership_no: string }> = [];
+                  for (const item of list) {
+                    if (!item) continue;
+                    if (typeof item === 'object' && item !== null) {
+                      const name = String(item.name || item.fullName || item.memberName || '').trim();
+                      const membership_no = String(item.membership_no || item.membershipNo || item.membership_id || '').trim();
+                      if (name && name !== '[object Object]') {
+                        result.push({ name, membership_no });
+                      }
+                    } else if (typeof item === 'string') {
+                      const trimmed = item.trim();
+                      if (!trimmed || trimmed === '[object Object]') continue;
+                      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                        try {
+                          const parsed = JSON.parse(trimmed);
+                          if (parsed && typeof parsed === 'object') {
+                            const name = String(parsed.name || parsed.fullName || '').trim();
+                            const membership_no = String(parsed.membership_no || parsed.membershipNo || '').trim();
+                            if (name && name !== '[object Object]') {
+                              result.push({ name, membership_no });
+                              continue;
+                            }
+                          }
+                        } catch (_) {}
+                      }
+                      result.push({ name: trimmed, membership_no: '' });
+                    }
+                  }
+                  return result;
+                };
+
+                const teamMembersList = parseMembers(teams?.members);
                 const isConfirmed = r.status === 'confirmed';
 
                 return (
@@ -234,22 +277,28 @@ function RegistrationsContent() {
                     </td>
                     <td className="p-3 text-slate-400">
                       {teams?.name ? (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           <p className="font-bold text-amber-300 text-xs">Team: {teams.name}</p>
-                          <div className="text-[11px] text-slate-300">
-                            <span className="font-semibold text-slate-400">Leader (M1): </span>
-                            {users?.name} {users?.membership_no ? <span className="text-emerald-400 font-mono font-semibold">(Membership ID: {users.membership_no})</span> : ''}
+                          <div className="text-[11px] text-slate-300 bg-slate-900/80 rounded-md p-1.5 border border-slate-800">
+                            <span className="font-semibold text-violet-300">Leader (M1): </span>
+                            <span className="font-medium text-slate-100">{users?.name || 'N/A'}</span>
+                            {users?.membership_no ? (
+                              <span className="ml-1 text-emerald-400 font-mono font-semibold">(Membership ID: {users.membership_no})</span>
+                            ) : (
+                              <span className="ml-1 text-slate-500 font-mono text-[10px]">(No Membership ID)</span>
+                            )}
                           </div>
-                          {membersList.map((m: any, idx: number) => {
-                            const mName = typeof m === 'object' && m !== null ? m.name : String(m);
-                            const mMem = typeof m === 'object' && m !== null ? m.membership_no : undefined;
-                            return (
-                              <div key={idx} className="text-[11px] text-slate-300">
-                                <span className="font-semibold text-slate-400">Member {idx + 2}: </span>
-                                {mName} {mMem ? <span className="text-emerald-400 font-mono font-semibold">(Membership ID: {mMem})</span> : <span className="text-slate-500 font-mono">(No ID)</span>}
-                              </div>
-                            );
-                          })}
+                          {teamMembersList.map((m, idx) => (
+                            <div key={idx} className="text-[11px] text-slate-300 bg-slate-900/50 rounded-md p-1.5 border border-slate-800/80">
+                              <span className="font-semibold text-slate-400">Member {idx + 2}: </span>
+                              <span className="font-medium text-slate-200">{m.name}</span>
+                              {m.membership_no ? (
+                                <span className="ml-1 text-emerald-400 font-mono font-semibold">(Membership ID: {m.membership_no})</span>
+                              ) : (
+                                <span className="ml-1 text-slate-500 font-mono text-[10px]">(No Membership ID)</span>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <span className="text-xs text-slate-500">Solo</span>

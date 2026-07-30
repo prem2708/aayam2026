@@ -272,22 +272,64 @@ export default function ScannerPage() {
                       <div>
                         <p className="text-xs text-slate-500 uppercase tracking-wider">Team / Group</p>
                         <p className="text-sm font-bold text-amber-300">{result.teams.name}</p>
-                        {membersList.length > 0 && (
-                          <div className="mt-1">
-                            <p className="text-xs text-slate-500 mb-1">Team Members:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {membersList.map((m: any, i: number) => {
-                                const name = typeof m === 'object' && m !== null ? m.name : String(m);
-                                const memNo = typeof m === 'object' && m !== null ? m.membership_no : undefined;
-                                return (
-                                  <span key={i} className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded px-1.5 py-0.5">
-                                    {name}{memNo ? ` (Membership ID: ${memNo})` : ''}
-                                  </span>
-                                );
-                              })}
+                        {(() => {
+                          const parseMembers = (raw: any): Array<{ name: string; membership_no: string }> => {
+                            if (!raw) return [];
+                            let list: any[] = [];
+                            if (Array.isArray(raw)) list = raw;
+                            else if (typeof raw === 'string') {
+                              try {
+                                const parsed = JSON.parse(raw);
+                                if (Array.isArray(parsed)) list = parsed;
+                                else if (typeof parsed === 'object' && parsed !== null) list = [parsed];
+                                else if (raw.trim() !== '[object Object]') list = [raw];
+                              } catch (_) {
+                                if (raw.trim() !== '[object Object]') list = [raw];
+                              }
+                            }
+                            const res: Array<{ name: string; membership_no: string }> = [];
+                            for (const item of list) {
+                              if (!item) continue;
+                              if (typeof item === 'object' && item !== null) {
+                                const name = String(item.name || item.fullName || '').trim();
+                                const membership_no = String(item.membership_no || item.membershipNo || '').trim();
+                                if (name && name !== '[object Object]') res.push({ name, membership_no });
+                              } else if (typeof item === 'string') {
+                                const trimmed = item.trim();
+                                if (!trimmed || trimmed === '[object Object]') continue;
+                                if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                                  try {
+                                    const parsed = JSON.parse(trimmed);
+                                    if (parsed && typeof parsed === 'object') {
+                                      const name = String(parsed.name || parsed.fullName || '').trim();
+                                      const membership_no = String(parsed.membership_no || parsed.membershipNo || '').trim();
+                                      if (name && name !== '[object Object]') { res.push({ name, membership_no }); continue; }
+                                    }
+                                  } catch (_) {}
+                                }
+                                res.push({ name: trimmed, membership_no: '' });
+                              }
+                            }
+                            return res;
+                          };
+                          const parsed = parseMembers(result.teams.members);
+                          if (!parsed.length) return null;
+                          return (
+                            <div className="mt-1.5 space-y-1">
+                              <p className="text-xs text-slate-500 mb-1">Team Members:</p>
+                              {parsed.map((m, i) => (
+                                <div key={i} className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded px-2 py-1 flex justify-between items-center gap-2">
+                                  <span className="font-semibold">Member {i + 2}: {m.name}</span>
+                                  {m.membership_no ? (
+                                    <span className="text-emerald-400 font-mono text-[11px] font-bold">ID: {m.membership_no}</span>
+                                  ) : (
+                                    <span className="text-slate-500 text-[10px]">(No ID)</span>
+                                  )}
+                                </div>
+                              ))}
                             </div>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     </div>
                   </>
