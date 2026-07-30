@@ -7,6 +7,7 @@ export const registerProfileSchema = z.object({
   branch: z.string().max(100).optional(),
   year: z.number().int().min(1).max(6).optional(),
   phone: z.string().max(20).optional(),
+  membership_no: z.string().max(100).optional(),
 });
 
 export const updateProfileSchema = registerProfileSchema.partial();
@@ -104,7 +105,15 @@ export const eventQuerySchema = z.object({
 export const registerSchema = z.object({
   event_id: z.string().uuid(),
   team_name: z.string().min(2).max(50).optional(),
-  team_members: z.array(z.string()).optional(),
+  team_members: z.array(
+    z.union([
+      z.string(),
+      z.object({
+        name: z.string().min(1),
+        membership_no: z.string().optional().nullable(),
+      }),
+    ])
+  ).optional(),
   payment_proof_url: z.string().url().optional().nullable().or(z.literal('')),
   payment_proof_file_id: z.string().optional().nullable(),
   transaction_id: z.string().optional().nullable().or(z.literal('')),

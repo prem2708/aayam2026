@@ -542,13 +542,28 @@ export function EventDetailClient({ event }: { event: Event }) {
                         </button>
                       ) : !teamConfirmed ? (
                         <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                          {/* Team Leader Summary */}
+                          <div className="rounded-xl border border-violet-500/20 bg-violet-950/20 p-3 text-xs space-y-1">
+                            <div className="flex justify-between items-center text-violet-300 font-bold uppercase tracking-wider text-[10px]">
+                              <span>Team Leader (You)</span>
+                              <span className="text-emerald-400">Leader</span>
+                            </div>
+                            <p className="font-semibold text-slate-200">{profileForm.name || user?.fullName || 'Team Leader'}</p>
+                            <p className="text-slate-400">
+                              Membership ID: <span className="text-violet-300 font-mono">{profileForm.membership_no || 'Not set'}</span>
+                            </p>
+                          </div>
+
                           {/* Team Name */}
-                          <input
-                            value={teamName}
-                            onChange={(e) => setTeamName(e.target.value)}
-                            placeholder="Enter Team Name"
-                            className={inputClass}
-                          />
+                          <div>
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Team Name</label>
+                            <input
+                              value={teamName}
+                              onChange={(e) => setTeamName(e.target.value)}
+                              placeholder="Enter Team Name"
+                              className={inputClass}
+                            />
+                          </div>
 
                           {/* Dynamic teammate slots */}
                           {teammates.map((member, idx) => (
@@ -565,26 +580,32 @@ export function EventDetailClient({ event }: { event: Event }) {
                                   ✕ Remove
                                 </button>
                               </div>
-                              <input
-                                value={member.name}
-                                onChange={(e) => {
-                                  const copy = [...teammates];
-                                  copy[idx] = { ...copy[idx], name: e.target.value };
-                                  setTeammates(copy);
-                                }}
-                                placeholder={`Full Name`}
-                                className={inputClass}
-                              />
-                              <input
-                                value={member.membership_no}
-                                onChange={(e) => {
-                                  const copy = [...teammates];
-                                  copy[idx] = { ...copy[idx], membership_no: e.target.value };
-                                  setTeammates(copy);
-                                }}
-                                placeholder={`Membership Registration / Reg No`}
-                                className={inputClass}
-                              />
+                              <div>
+                                <label className="text-[10px] text-slate-400 font-semibold mb-1 block">Teammate Name</label>
+                                <input
+                                  value={member.name}
+                                  onChange={(e) => {
+                                    const copy = [...teammates];
+                                    copy[idx] = { ...copy[idx], name: e.target.value };
+                                    setTeammates(copy);
+                                  }}
+                                  placeholder="Name (e.g. Prem)"
+                                  className={inputClass}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[10px] text-slate-400 font-semibold mb-1 block">Teammate Membership ID</label>
+                                <input
+                                  value={member.membership_no}
+                                  onChange={(e) => {
+                                    const copy = [...teammates];
+                                    copy[idx] = { ...copy[idx], membership_no: e.target.value };
+                                    setTeammates(copy);
+                                  }}
+                                  placeholder="Membership ID (given by them)"
+                                  className={inputClass}
+                                />
+                              </div>
                             </div>
                           ))}
 
@@ -595,7 +616,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                               onClick={() => setTeammates([...teammates, { name: '', membership_no: '' }])}
                               className="w-full rounded-xl border border-dashed border-violet-500/40 py-2.5 text-xs font-bold text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/70 transition-all flex items-center justify-center gap-1.5"
                             >
-                              <Plus className="h-3.5 w-3.5" /> Add Member
+                              <Plus className="h-3.5 w-3.5" /> Add Team Member
                             </button>
                           )}
 
@@ -634,7 +655,10 @@ export function EventDetailClient({ event }: { event: Event }) {
                               </button>
                             </div>
                             <div className="text-xs text-slate-400">
-                              Members: You {teammates.filter((t) => t.name.trim()).map((m) => `, ${m.name}${m.membership_no ? ` (${m.membership_no})` : ''}`)}
+                              Leader: {profileForm.name || user?.fullName || 'You'}{profileForm.membership_no ? ` (${profileForm.membership_no})` : ''}
+                            </div>
+                            <div className="text-xs text-slate-400 mt-1">
+                              Members: {teammates.filter((t) => t.name.trim()).map((m) => `${m.name}${m.membership_no ? ` (${m.membership_no})` : ''}`).join(', ')}
                             </div>
                           </div>
 
@@ -841,7 +865,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1.5">Membership Reg No / Registration No</label>
+                  <label className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1.5">Team Leader Membership ID / Reg No</label>
                   <input
                     type="text"
                     value={profileForm.membership_no}
