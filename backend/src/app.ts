@@ -61,6 +61,14 @@ app.get('/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok', service: 'aayamtechfest-api' } });
 });
 
+// Normalize double slashes in request URLs (e.g. //api/v1/events -> /api/v1/events)
+app.use((req, _res, next) => {
+  if (req.url && req.url.includes('//')) {
+    req.url = req.url.replace(/\/+/g, '/');
+  }
+  next();
+});
+
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admin/auth', adminAuthRoutes);
 app.use('/api/v1/events', eventsRoutes);

@@ -1,4 +1,13 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+const getRawApiUrl = () => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+export function buildApiUrl(path: string): string {
+  const base = getRawApiUrl()
+    .trim()
+    .replace(/\/+$/, '')
+    .replace(/(https?:\/\/)|(\/+)/g, (match, protocol) => protocol || '/');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${cleanPath}`;
+}
 
 export async function apiFetch<T>(
   path: string,
@@ -11,7 +20,8 @@ export async function apiFetch<T>(
   };
   if (token) (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${path}`, { ...fetchOptions, headers });
+  const targetUrl = buildApiUrl(path);
+  const res = await fetch(targetUrl, { ...fetchOptions, headers });
   return res.json();
 }
 

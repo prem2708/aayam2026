@@ -83,6 +83,13 @@ export const eventSchema = z.object({
     }
     return val;
   }, z.number().int().nonnegative().optional().nullable()),
+  per_person_amount: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      if (val.trim() === '') return null;
+      return Number(val);
+    }
+    return val;
+  }, z.number().int().nonnegative().optional().nullable()),
   requires_approval: z.boolean().default(false),
   allow_cancellation: z.boolean().default(true),
   is_featured: z.boolean().default(false),

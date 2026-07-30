@@ -1,4 +1,13 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+const getRawApiUrl = () => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+export function buildApiUrl(path: string): string {
+  const base = getRawApiUrl()
+    .trim()
+    .replace(/\/+$/, '')
+    .replace(/(https?:\/\/)|(\/+)/g, (match, protocol) => protocol || '/');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${cleanPath}`;
+}
 
 export function getAdminToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -35,7 +44,8 @@ export async function adminFetch<T>(
   };
   if (token) (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const targetUrl = buildApiUrl(path);
+  const res = await fetch(targetUrl, { ...options, headers });
   
   if (res.status === 401 && token) {
     clearAdminToken();
