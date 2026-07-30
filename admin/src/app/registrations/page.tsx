@@ -20,6 +20,7 @@ function RegistrationsContent() {
     branch: '',
     year: 1,
     phone: '',
+    membership_no: '',
   });
   const [downloadingTicketId, setDownloadingTicketId] = useState<string | null>(null);
 
@@ -91,6 +92,7 @@ function RegistrationsContent() {
       branch: user.branch || '',
       year: user.year || 1,
       phone: user.phone || '',
+      membership_no: user.membership_no || '',
     });
   };
 
@@ -200,9 +202,15 @@ function RegistrationsContent() {
             </thead>
             <tbody>
               {registrations.map((r: Record<string, any>) => {
-                const users = r.users as { id?: string; name?: string; email?: string; phone?: string; college?: string; branch?: string; year?: number } | undefined;
+                const users = r.users as { id?: string; name?: string; email?: string; phone?: string; college?: string; branch?: string; year?: number; membership_no?: string } | undefined;
                 const teams = r.teams as { name?: string; members?: unknown } | undefined;
-                const membersList = Array.isArray(teams?.members) ? (teams.members as string[]) : [];
+                const membersList = Array.isArray(teams?.members) ? teams.members : [];
+                const formattedMembers = membersList.map((m: any) => {
+                  if (typeof m === 'object' && m !== null) {
+                    return m.membership_no ? `${m.name} (Reg: ${m.membership_no})` : m.name;
+                  }
+                  return String(m);
+                });
                 const isConfirmed = r.status === 'confirmed';
 
                 return (
@@ -211,6 +219,7 @@ function RegistrationsContent() {
                       <div>
                         <p className="font-semibold text-slate-200">{users?.name}</p>
                         {r.registration_no && <p className="text-xs text-violet-400 font-semibold">Reg ID: {r.registration_no}</p>}
+                        {users?.membership_no && <p className="text-xs text-emerald-400 font-semibold">Mem Reg: {users.membership_no}</p>}
                         <p className="text-xs text-slate-500">{users?.email}</p>
                         {users?.phone && <p className="text-xs text-slate-500">{users.phone}</p>}
                       </div>
@@ -227,9 +236,9 @@ function RegistrationsContent() {
                       {teams?.name ? (
                         <div>
                           <p className="font-semibold text-slate-300">{teams.name}</p>
-                          {membersList.length > 0 && (
+                          {formattedMembers.length > 0 && (
                             <p className="text-[11px] text-slate-500 mt-0.5">
-                              Members: {membersList.join(', ')}
+                              Members: {formattedMembers.join(', ')}
                             </p>
                           )}
                         </div>
@@ -400,6 +409,15 @@ function RegistrationsContent() {
                     className="w-full rounded-lg bg-slate-900 border border-slate-700 px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
                   />
                 </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Membership Reg No / Registration No</label>
+                <input
+                  type="text"
+                  value={editForm.membership_no}
+                  onChange={(e) => setEditForm({ ...editForm, membership_no: e.target.value })}
+                  className="w-full rounded-lg bg-slate-900 border border-slate-700 px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                />
               </div>
             </div>
 

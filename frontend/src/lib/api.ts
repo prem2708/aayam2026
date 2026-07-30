@@ -73,5 +73,6 @@ export interface UserProfile {
   branch?: string;
   year?: number;
   phone?: string;
+  membership_no?: string;
   avatar_url?: string;
 }

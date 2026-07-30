@@ -14,6 +14,7 @@ interface StudentUser {
   branch?: string;
   year?: number;
   phone?: string;
+  membership_no?: string;
   created_at: string;
 }
 
@@ -30,6 +31,7 @@ export default function StudentsPage() {
     branch: '',
     year: 1,
     phone: '',
+    membership_no: '',
   });
 
   // Fetch student users
@@ -82,6 +84,7 @@ export default function StudentsPage() {
       branch: student.branch || '',
       year: student.year || 1,
       phone: student.phone || '',
+      membership_no: student.membership_no || '',
     });
   };
 
@@ -168,6 +171,15 @@ export default function StudentsPage() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="text-xs text-slate-400 block mb-1">Membership Reg No / Registration No</label>
+                <input
+                  type="text"
+                  value={editForm.membership_no}
+                  onChange={(e) => setEditForm({ ...editForm, membership_no: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
             </div>
 
             <button
@@ -193,6 +205,7 @@ export default function StudentsPage() {
                 <tr>
                   <th className="text-left p-3">Name</th>
                   <th className="text-left p-3">Email</th>
+                  <th className="text-left p-3">Mem Reg No</th>
                   <th className="text-left p-3">College</th>
                   <th className="text-left p-3">Branch & Year</th>
                   <th className="text-left p-3">Phone</th>
@@ -204,6 +217,7 @@ export default function StudentsPage() {
                   <tr key={student.id} className="border-b border-slate-800/50 hover:bg-slate-800/20">
                     <td className="p-3 font-medium text-slate-200">{student.name}</td>
                     <td className="p-3 text-slate-400">{student.email}</td>
+                    <td className="p-3 text-emerald-400 font-semibold">{student.membership_no || 'N/A'}</td>
                     <td className="p-3 text-slate-400">{student.college}</td>
                     <td className="p-3 text-slate-400">
                       {student.branch || 'N/A'} {student.year ? `(Year ${student.year})` : ''}

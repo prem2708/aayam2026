@@ -130,6 +130,7 @@ export async function listUsers(req: AdminAuthRequest, res: import('express').Re
       { name: { contains: q, mode: 'insensitive' } },
       { email: { contains: q, mode: 'insensitive' } },
       { college: { contains: q, mode: 'insensitive' } },
+      { membership_no: { contains: q, mode: 'insensitive' } },
     ];
   }
 

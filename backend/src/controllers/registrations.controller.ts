@@ -264,7 +264,7 @@ export async function downloadTicket(req: AuthRequest, res: import('express').Re
         select: { title: true, event_start_at: true, venue: true, category: true },
       },
       user: {
-        select: { name: true, college: true, email: true, phone: true, branch: true },
+        select: { name: true, college: true, email: true, phone: true, branch: true, membership_no: true },
       },
       team: {
         select: { name: true, members: true },
@@ -275,7 +275,7 @@ export async function downloadTicket(req: AuthRequest, res: import('express').Re
   if (!reg) throw new AppError(404, 'Registration not found');
   if (reg.status !== 'confirmed') throw new AppError(400, 'Ticket available only for confirmed registrations');
 
-  const membersList = Array.isArray(reg.team?.members) ? (reg.team.members as string[]) : [];
+  const membersList = Array.isArray(reg.team?.members) ? reg.team.members : [];
 
   const pdf = await generateTicketPdf({
     eventTitle: reg.event.title,
@@ -287,6 +287,7 @@ export async function downloadTicket(req: AuthRequest, res: import('express').Re
     userEmail: reg.user.email,
     userPhone: reg.user.phone || undefined,
     userBranch: reg.user.branch || undefined,
+    userMembershipNo: reg.user.membership_no || undefined,
     teamName: reg.team?.name || undefined,
     teamMembers: membersList.length > 0 ? membersList : undefined,
     category: reg.event.category,
@@ -346,7 +347,7 @@ export async function scanQr(req: AdminAuthRequest, res: import('express').Respo
     },
     include: {
       event: { select: { title: true, venue: true, event_start_at: true } },
-      user: { select: { name: true, email: true, college: true, phone: true, branch: true, year: true } },
+      user: { select: { name: true, email: true, college: true, phone: true, branch: true, year: true, membership_no: true } },
       team: { select: { name: true, members: true } },
     },
   }) as any;
@@ -375,7 +376,7 @@ export async function scanQr(req: AdminAuthRequest, res: import('express').Respo
       data: { attended_at: new Date() },
       include: {
         event: { select: { title: true, venue: true, event_start_at: true } },
-        user: { select: { name: true, email: true, college: true, phone: true, branch: true, year: true } },
+        user: { select: { name: true, email: true, college: true, phone: true, branch: true, year: true, membership_no: true } },
         team: { select: { name: true, members: true } },
       },
     }) as any;
@@ -495,7 +496,7 @@ export async function adminDownloadTicket(req: AdminAuthRequest, res: import('ex
         select: { title: true, event_start_at: true, venue: true, category: true },
       },
       user: {
-        select: { name: true, college: true, email: true, phone: true, branch: true },
+        select: { name: true, college: true, email: true, phone: true, branch: true, membership_no: true },
       },
       team: {
         select: { name: true, members: true },
@@ -506,7 +507,7 @@ export async function adminDownloadTicket(req: AdminAuthRequest, res: import('ex
   if (!reg) throw new AppError(404, 'Registration not found');
   if (reg.status !== 'confirmed') throw new AppError(400, 'Ticket available only for confirmed registrations');
 
-  const membersList = Array.isArray(reg.team?.members) ? (reg.team.members as string[]) : [];
+  const membersList = Array.isArray(reg.team?.members) ? reg.team.members : [];
 
   const pdf = await generateTicketPdf({
     eventTitle: reg.event.title,
@@ -518,6 +519,7 @@ export async function adminDownloadTicket(req: AdminAuthRequest, res: import('ex
     userEmail: reg.user.email,
     userPhone: reg.user.phone || undefined,
     userBranch: reg.user.branch || undefined,
+    userMembershipNo: reg.user.membership_no || undefined,
     teamName: reg.team?.name || undefined,
     teamMembers: membersList.length > 0 ? membersList : undefined,
     category: reg.event.category,

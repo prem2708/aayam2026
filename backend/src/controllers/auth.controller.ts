@@ -17,7 +17,7 @@ const LOCK_DURATION_MS = 15 * 60 * 1000;
 export async function registerProfile(req: AuthRequest, res: import('express').Response) {
   const userId = req.userId!;
   const email = req.userEmail || req.body.email;
-  const { name, college, branch, year, phone } = req.body;
+  const { name, college, branch, year, phone, membership_no } = req.body;
 
   if (!email) {
     throw new AppError(400, 'Email is required to complete profile registration');
@@ -41,6 +41,7 @@ export async function registerProfile(req: AuthRequest, res: import('express').R
         branch,
         year: year ? Number(year) : null,
         phone,
+        membership_no: membership_no || null,
       },
     });
     res.status(201).json({ success: true, data });

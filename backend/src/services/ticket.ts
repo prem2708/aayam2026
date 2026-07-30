@@ -16,8 +16,9 @@ export async function generateTicketPdf(params: {
   userEmail?: string;
   userPhone?: string;
   userBranch?: string;
+  userMembershipNo?: string;
   teamName?: string;
-  teamMembers?: string[];
+  teamMembers?: (string | { name: string; membership_no?: string })[];
   category?: string;
   registrationNo?: string;
 }): Promise<Buffer> {
@@ -114,25 +115,38 @@ export async function generateTicketPdf(params: {
       doc.text(`Branch: ${params.userBranch}`, 35, detailsY + offset);
       offset += 12;
     }
+    if (params.userMembershipNo) {
+      doc.fillColor('#a7f3d0')
+        .text(`Mem Reg No: ${params.userMembershipNo}`, 35, detailsY + offset);
+      doc.fillColor('#94a3b8');
+      offset += 12;
+    }
 
     // Team details (if any)
     if (params.teamName) {
       doc.strokeColor('#1e293b')
         .lineWidth(1)
-        .moveTo(35, detailsY + offset + 6)
-        .lineTo(330, detailsY + offset + 6)
+        .moveTo(35, detailsY + offset + 4)
+        .lineTo(330, detailsY + offset + 4)
         .stroke();
 
       doc.fillColor('#06b6d4')
         .fontSize(8)
         .font('Helvetica-Bold')
-        .text(`Team: ${params.teamName}`, 35, detailsY + offset + 14);
+        .text(`Team: ${params.teamName}`, 35, detailsY + offset + 10);
 
       if (params.teamMembers && params.teamMembers.length > 0) {
+        const formattedMembers = params.teamMembers.map(m => {
+          if (typeof m === 'object' && m !== null) {
+            return m.membership_no ? `${m.name} (Reg: ${m.membership_no})` : m.name;
+          }
+          return String(m);
+        }).join(', ');
+
         doc.fillColor('#94a3b8')
           .fontSize(7)
           .font('Helvetica')
-          .text(`Members: ${params.teamMembers.join(', ')}`, 35, detailsY + offset + 24, { width: 295 });
+          .text(`Members: ${formattedMembers}`, 35, detailsY + offset + 20, { width: 295 });
       }
     }
 

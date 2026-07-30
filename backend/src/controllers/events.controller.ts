@@ -218,7 +218,7 @@ export async function getEventRegistrations(req: AdminAuthRequest, res: import('
         where,
         include: {
           user: {
-            select: { id: true, name: true, email: true, college: true, branch: true, year: true, phone: true },
+            select: { id: true, name: true, email: true, college: true, branch: true, year: true, phone: true, membership_no: true },
           },
           team: {
             select: { name: true, registration_no: true, members: true },
@@ -246,7 +246,8 @@ export async function getEventRegistrations(req: AdminAuthRequest, res: import('
       filtered = filtered.filter(
         (r: any) =>
           r.users?.name?.toLowerCase().includes(lower) ||
-          r.users?.college?.toLowerCase().includes(lower)
+          r.users?.college?.toLowerCase().includes(lower) ||
+          r.users?.membership_no?.toLowerCase().includes(lower)
       );
     }
 
@@ -263,26 +264,38 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
       where: { event_id: eventId },
       include: {
         user: {
-          select: { name: true, email: true, college: true, branch: true, phone: true },
+          select: { name: true, email: true, college: true, branch: true, phone: true, membership_no: true },
         },
         team: {
-          select: { name: true },
+          select: { name: true, members: true },
         },
       },
     }) as any[];
 
-    const headers = ['Name', 'Email', 'College', 'Branch', 'Team', 'Status', 'Registered At', 'Attended', 'UTR / Transaction ID'];
-    const rows = data.map((r: any) => [
-      r.user?.name || '',
-      r.user?.email || '',
-      r.user?.college || '',
-      r.user?.branch || '',
-      r.team?.name || 'Solo',
-      r.status,
-      r.registered_at.toISOString(),
-      r.attended_at ? r.attended_at.toISOString() : 'No',
-      r.transaction_id || '',
-    ]);
+    const headers = ['Name', 'Email', 'Membership Reg No', 'College', 'Branch', 'Team', 'Team Members & Membership Reg Nos', 'Status', 'Registered At', 'Attended', 'UTR / Transaction ID'];
+    const rows = data.map((r: any) => {
+      const membersList = Array.isArray(r.team?.members) ? r.team.members : [];
+      const formattedMembers = membersList.map((m: any) => {
+        if (typeof m === 'object' && m !== null) {
+          return m.membership_no ? `${m.name} (Reg: ${m.membership_no})` : m.name;
+        }
+        return String(m);
+      }).join('; ');
+
+      return [
+        r.user?.name || '',
+        r.user?.email || '',
+        r.user?.membership_no || 'N/A',
+        r.user?.college || '',
+        r.user?.branch || '',
+        r.team?.name || 'Solo',
+        formattedMembers || 'N/A',
+        r.status,
+        r.registered_at.toISOString(),
+        r.attended_at ? r.attended_at.toISOString() : 'No',
+        r.transaction_id || '',
+      ];
+    });
 
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const workbook = XLSX.utils.book_new();

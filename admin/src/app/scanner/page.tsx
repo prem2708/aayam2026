@@ -19,10 +19,11 @@ type ScanResult = {
     phone?: string;
     branch?: string;
     year?: number;
+    membership_no?: string;
   };
   teams?: {
     name?: string;
-    members?: string[];
+    members?: (string | { name: string; membership_no?: string })[];
   };
   registration_no?: string;
   status?: string;
@@ -237,6 +238,9 @@ export default function ScannerPage() {
                     <div>
                       <p className="text-xs text-slate-500 uppercase tracking-wider">Participant</p>
                       <p className="text-base font-bold text-slate-100">{result.users?.name}</p>
+                      {result.users?.membership_no && (
+                        <p className="text-xs font-semibold text-emerald-400">Mem Reg No: {result.users.membership_no}</p>
+                      )}
                       <p className="text-xs text-slate-400">{result.users?.college}</p>
                       {result.users?.branch && (
                         <p className="text-xs text-slate-500">
@@ -272,11 +276,15 @@ export default function ScannerPage() {
                           <div className="mt-1">
                             <p className="text-xs text-slate-500 mb-1">Team Members:</p>
                             <div className="flex flex-wrap gap-1">
-                              {membersList.map((m, i) => (
-                                <span key={i} className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded px-1.5 py-0.5">
-                                  {m}
-                                </span>
-                              ))}
+                              {membersList.map((m: any, i: number) => {
+                                const name = typeof m === 'object' && m !== null ? m.name : String(m);
+                                const memNo = typeof m === 'object' && m !== null ? m.membership_no : undefined;
+                                return (
+                                  <span key={i} className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded px-1.5 py-0.5">
+                                    {name}{memNo ? ` (Reg: ${memNo})` : ''}
+                                  </span>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
