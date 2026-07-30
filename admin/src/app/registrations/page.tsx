@@ -234,13 +234,22 @@ function RegistrationsContent() {
                     </td>
                     <td className="p-3 text-slate-400">
                       {teams?.name ? (
-                        <div>
-                          <p className="font-semibold text-slate-300">{teams.name}</p>
-                          {formattedMembers.length > 0 && (
-                            <p className="text-[11px] text-slate-500 mt-0.5">
-                              Members: {formattedMembers.join(', ')}
-                            </p>
-                          )}
+                        <div className="space-y-1">
+                          <p className="font-bold text-amber-300 text-xs">Team: {teams.name}</p>
+                          <div className="text-[11px] text-slate-300">
+                            <span className="font-semibold text-slate-400">Leader (M1): </span>
+                            {users?.name} {users?.membership_no ? <span className="text-emerald-400 font-mono font-semibold">({users.membership_no})</span> : ''}
+                          </div>
+                          {membersList.map((m: any, idx: number) => {
+                            const mName = typeof m === 'object' && m !== null ? m.name : String(m);
+                            const mMem = typeof m === 'object' && m !== null ? m.membership_no : undefined;
+                            return (
+                              <div key={idx} className="text-[11px] text-slate-300">
+                                <span className="font-semibold text-slate-400">Member {idx + 2}: </span>
+                                {mName} {mMem ? <span className="text-emerald-400 font-mono font-semibold">({mMem})</span> : <span className="text-slate-500 font-mono">(No ID)</span>}
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <span className="text-xs text-slate-500">Solo</span>

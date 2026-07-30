@@ -172,7 +172,7 @@ export default function StudentsPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Membership Reg No / Registration No</label>
+                <label className="text-xs text-slate-400 block mb-1">Membership ID / Reg No</label>
                 <input
                   type="text"
                   value={editForm.membership_no}
@@ -205,7 +205,7 @@ export default function StudentsPage() {
                 <tr>
                   <th className="text-left p-3">Name</th>
                   <th className="text-left p-3">Email</th>
-                  <th className="text-left p-3">Mem Reg No</th>
+                  <th className="text-left p-3">Membership ID / Reg No</th>
                   <th className="text-left p-3">College</th>
                   <th className="text-left p-3">Branch & Year</th>
                   <th className="text-left p-3">Phone</th>

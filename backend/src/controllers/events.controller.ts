@@ -272,14 +272,37 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
       },
     }) as any[];
 
-    const headers = ['Name', 'Email', 'Membership Reg No', 'College', 'Branch', 'Team', 'Team Members & Membership Reg Nos', 'Status', 'Registered At', 'Attended', 'UTR / Transaction ID'];
+    const headers = [
+      'Team Leader Name',
+      'Team Leader Email',
+      'Team Leader Membership ID / Reg No',
+      'College',
+      'Branch',
+      'Team Name',
+      'Member 2 Name',
+      'Member 2 Membership ID',
+      'Member 3 Name',
+      'Member 3 Membership ID',
+      'Member 4 Name',
+      'Member 4 Membership ID',
+      'All Teammates (Name & Membership ID)',
+      'Status',
+      'Registered At',
+      'Attended',
+      'UTR / Transaction ID',
+    ];
     const rows = data.map((r: any) => {
       const membersList = Array.isArray(r.team?.members) ? r.team.members : [];
-      const formattedMembers = membersList.map((m: any) => {
+      
+      const m2 = typeof membersList[0] === 'object' && membersList[0] !== null ? membersList[0] : (membersList[0] ? { name: String(membersList[0]), membership_no: '' } : null);
+      const m3 = typeof membersList[1] === 'object' && membersList[1] !== null ? membersList[1] : (membersList[1] ? { name: String(membersList[1]), membership_no: '' } : null);
+      const m4 = typeof membersList[2] === 'object' && membersList[2] !== null ? membersList[2] : (membersList[2] ? { name: String(membersList[2]), membership_no: '' } : null);
+
+      const formattedMembers = membersList.map((m: any, idx: number) => {
         if (typeof m === 'object' && m !== null) {
-          return m.membership_no ? `${m.name} (Reg: ${m.membership_no})` : m.name;
+          return `Member ${idx + 2}: ${m.name}${m.membership_no ? ` (ID: ${m.membership_no})` : ''}`;
         }
-        return String(m);
+        return `Member ${idx + 2}: ${String(m)}`;
       }).join('; ');
 
       return [
@@ -289,6 +312,12 @@ export async function exportRegistrations(req: AdminAuthRequest, res: import('ex
         r.user?.college || '',
         r.user?.branch || '',
         r.team?.name || 'Solo',
+        m2?.name || '',
+        m2?.membership_no || '',
+        m3?.name || '',
+        m3?.membership_no || '',
+        m4?.name || '',
+        m4?.membership_no || '',
         formattedMembers || 'N/A',
         r.status,
         r.registered_at.toISOString(),

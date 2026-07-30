@@ -535,7 +535,13 @@ export function EventDetailClient({ event }: { event: Event }) {
                       {!isCreatingTeam ? (
                         <button
                           type="button"
-                          onClick={() => setIsCreatingTeam(true)}
+                          onClick={() => {
+                            setIsCreatingTeam(true);
+                            if (teammates.length === 0) {
+                              const minNeeded = Math.max(1, (event.min_team_size ?? 1) - 1);
+                              setTeammates(Array.from({ length: minNeeded }, () => ({ name: '', membership_no: '' })));
+                            }
+                          }}
                           className="w-full rounded-xl border border-dashed border-violet-500/40 py-3.5 text-sm font-bold text-violet-400 hover:bg-violet-500/10 transition-all flex items-center justify-center gap-2"
                         >
                           <Users className="h-4 w-4" /> Create Team
@@ -545,7 +551,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                           {/* Team Leader Summary */}
                           <div className="rounded-xl border border-violet-500/20 bg-violet-950/20 p-3 text-xs space-y-1">
                             <div className="flex justify-between items-center text-violet-300 font-bold uppercase tracking-wider text-[10px]">
-                              <span>Team Leader (You)</span>
+                              <span>Team Leader (Member 1 - You)</span>
                               <span className="text-emerald-400">Leader</span>
                             </div>
                             <p className="font-semibold text-slate-200">{profileForm.name || user?.fullName || 'Team Leader'}</p>
@@ -570,18 +576,20 @@ export function EventDetailClient({ event }: { event: Event }) {
                             <div key={idx} className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 space-y-2 relative">
                               <div className="flex justify-between items-center">
                                 <span className="text-[11px] font-bold text-violet-400 uppercase tracking-wider">
-                                  Teammate {idx + 2} Details
+                                  Team Member {idx + 2} Details
                                 </span>
-                                <button
-                                  type="button"
-                                  onClick={() => setTeammates(teammates.filter((_, i) => i !== idx))}
-                                  className="rounded-lg border border-red-500/30 px-2 py-0.5 text-red-400 hover:bg-red-500/10 transition-all text-xs font-bold"
-                                >
-                                  ✕ Remove
-                                </button>
+                                {teammates.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setTeammates(teammates.filter((_, i) => i !== idx))}
+                                    className="rounded-lg border border-red-500/30 px-2 py-0.5 text-red-400 hover:bg-red-500/10 transition-all text-xs font-bold"
+                                  >
+                                    ✕ Remove
+                                  </button>
+                                )}
                               </div>
                               <div>
-                                <label className="text-[10px] text-slate-400 font-semibold mb-1 block">Teammate Name</label>
+                                <label className="text-[10px] text-slate-400 font-semibold mb-1 block">Team Member {idx + 2} Name</label>
                                 <input
                                   value={member.name}
                                   onChange={(e) => {
@@ -589,12 +597,12 @@ export function EventDetailClient({ event }: { event: Event }) {
                                     copy[idx] = { ...copy[idx], name: e.target.value };
                                     setTeammates(copy);
                                   }}
-                                  placeholder="Name (e.g. Prem)"
+                                  placeholder={`Enter Member ${idx + 2} Full Name`}
                                   className={inputClass}
                                 />
                               </div>
                               <div>
-                                <label className="text-[10px] text-slate-400 font-semibold mb-1 block">Teammate Membership ID</label>
+                                <label className="text-[10px] text-slate-400 font-semibold mb-1 block">Team Member {idx + 2} Membership ID / Reg No</label>
                                 <input
                                   value={member.membership_no}
                                   onChange={(e) => {
@@ -602,7 +610,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                                     copy[idx] = { ...copy[idx], membership_no: e.target.value };
                                     setTeammates(copy);
                                   }}
-                                  placeholder="Membership ID (given by them)"
+                                  placeholder={`Enter Member ${idx + 2} Membership ID`}
                                   className={inputClass}
                                 />
                               </div>
@@ -616,7 +624,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                               onClick={() => setTeammates([...teammates, { name: '', membership_no: '' }])}
                               className="w-full rounded-xl border border-dashed border-violet-500/40 py-2.5 text-xs font-bold text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/70 transition-all flex items-center justify-center gap-1.5"
                             >
-                              <Plus className="h-3.5 w-3.5" /> Add Team Member
+                              <Plus className="h-3.5 w-3.5" /> Add Team Member {teammates.length + 2}
                             </button>
                           )}
 
@@ -865,7 +873,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1.5">Team Leader Membership ID / Reg No</label>
+                  <label className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1.5">Membership ID / Reg No</label>
                   <input
                     type="text"
                     value={profileForm.membership_no}

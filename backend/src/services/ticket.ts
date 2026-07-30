@@ -138,7 +138,7 @@ export async function generateTicketPdf(params: {
       if (params.teamMembers && params.teamMembers.length > 0) {
         const formattedMembers = params.teamMembers.map(m => {
           if (typeof m === 'object' && m !== null) {
-            return m.membership_no ? `${m.name} (Reg: ${m.membership_no})` : m.name;
+            return m.membership_no ? `${m.name} (Mem ID: ${m.membership_no})` : m.name;
           }
           return String(m);
         }).join(', ');
