@@ -63,7 +63,7 @@ export function HomeHero({ featured, announcements = [] }: { featured: Event[]; 
                   boxShadow: '0 0 20px rgba(245,158,11,0.1)',
                 }}>
                 <Calendar className="h-3.5 w-3.5" />
-                August 12–13, 2026
+                August 13–14, 2026
                 <span className="h-1.5 w-1.5 rounded-full bg-current animate-ring-pulse" />
               </span>
             </motion.div>
