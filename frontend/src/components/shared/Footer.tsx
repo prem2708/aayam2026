@@ -155,6 +155,30 @@ export function Footer() {
               </div>
             </motion.div>
 
+            {/* Free Fire Community */}
+            <motion.div
+              whileHover={{ scale: 1.04, y: -3 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="flex items-center gap-3.5 rounded-2xl px-5 py-3.5"
+              style={{
+                background: 'rgba(249,115,22,0.06)',
+                border: '1px solid rgba(249,115,22,0.16)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+              }}
+            >
+              <img
+                src="https://ik.imagekit.io/ioyklag3bb/WhatsApp%20Image%202026-07-30%20at%2010.14.23%20PM.jpeg"
+                alt="Free Fire Community Logo"
+                className="h-10 sm:h-12 w-auto object-contain rounded-xl shrink-0"
+                style={{ filter: 'drop-shadow(0 2px 10px rgba(249,115,22,0.35))' }}
+              />
+              <div className="text-left">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
+                  style={{ color: 'rgba(249,115,22,0.9)' }}>Gaming Partner</p>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">Free Fire Community</span>
+              </div>
+            </motion.div>
+
           </div>
         </div>
       </div>
