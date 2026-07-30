@@ -216,34 +216,66 @@ function RegistrationsContent() {
                       const parsed = JSON.parse(raw);
                       if (Array.isArray(parsed)) list = parsed;
                       else if (typeof parsed === 'object' && parsed !== null) list = [parsed];
-                      else if (raw.trim() !== '[object Object]') list = [raw];
+                      else list = [raw];
                     } catch (_) {
-                      if (raw.trim() !== '[object Object]') list = [raw];
+                      list = [raw];
                     }
                   }
 
                   const result: Array<{ name: string; membership_no: string }> = [];
-                  for (const item of list) {
+                  for (let i = 0; i < list.length; i++) {
+                    const item = list[i];
                     if (!item) continue;
+
                     if (typeof item === 'object' && item !== null) {
-                      const name = String(item.name || item.fullName || item.memberName || '').trim();
-                      const membership_no = String(item.membership_no || item.membershipNo || item.membership_id || '').trim();
-                      if (name && name !== '[object Object]') {
-                        result.push({ name, membership_no });
+                      let name = String(
+                        item.name ||
+                        item.fullName ||
+                        item.memberName ||
+                        item.member_name ||
+                        item.user_name ||
+                        item.student_name ||
+                        ''
+                      ).trim();
+
+                      if (!name || name === '[object Object]') {
+                        const strVal = Object.values(item).find(
+                          (v) => typeof v === 'string' && v.trim() !== '' && v.trim() !== '[object Object]'
+                        );
+                        name = strVal ? String(strVal).trim() : `Member ${i + 2}`;
                       }
+
+                      const membership_no = String(
+                        item.membership_no ||
+                        item.membershipNo ||
+                        item.membership_id ||
+                        item.membershipId ||
+                        item.regNo ||
+                        item.reg_no ||
+                        ''
+                      ).trim();
+
+                      result.push({
+                        name: name === '[object Object]' ? `Member ${i + 2}` : name,
+                        membership_no: membership_no === '[object Object]' ? '' : membership_no,
+                      });
                     } else if (typeof item === 'string') {
                       const trimmed = item.trim();
-                      if (!trimmed || trimmed === '[object Object]') continue;
+                      if (trimmed === '[object Object]' || !trimmed) {
+                        result.push({ name: `Member ${i + 2}`, membership_no: '' });
+                        continue;
+                      }
                       if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
                         try {
                           const parsed = JSON.parse(trimmed);
                           if (parsed && typeof parsed === 'object') {
-                            const name = String(parsed.name || parsed.fullName || '').trim();
+                            const name = String(parsed.name || parsed.fullName || parsed.memberName || `Member ${i + 2}`).trim();
                             const membership_no = String(parsed.membership_no || parsed.membershipNo || '').trim();
-                            if (name && name !== '[object Object]') {
-                              result.push({ name, membership_no });
-                              continue;
-                            }
+                            result.push({
+                              name: name === '[object Object]' ? `Member ${i + 2}` : name,
+                              membership_no: membership_no === '[object Object]' ? '' : membership_no,
+                            });
+                            continue;
                           }
                         } catch (_) {}
                       }
