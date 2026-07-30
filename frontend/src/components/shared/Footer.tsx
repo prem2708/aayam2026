@@ -55,7 +55,7 @@ export function Footer() {
               <div className="text-left">
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
                   style={{ color: 'rgba(245,158,11,0.85)' }}>Host Partner</p>
-                <span className="text-sm sm:text-base font-bold font-heading text-white">RKDF University</span>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">RKDF University Ranchi</span>
               </div>
             </motion.div>
 
