@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Suspense, useState } from 'react';
-import { Download, Eye, Edit2, X, Loader2, FileDown } from 'lucide-react';
+import { Download, Eye, Edit2, X, Loader2, FileDown, Users, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { adminFetch, AdminEvent, getAdminToken } from '@/lib/api';
 import { formatDate, cn, STATUS_COLORS } from '@/lib/utils';
@@ -23,6 +23,19 @@ function RegistrationsContent() {
     membership_no: '',
   });
   const [downloadingTicketId, setDownloadingTicketId] = useState<string | null>(null);
+  const [viewingTeam, setViewingTeam] = useState<{
+    teamName: string;
+    leader: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      membership_no?: string;
+      college?: string;
+      branch?: string;
+      year?: number;
+    };
+    members: Array<{ name: string; membership_no: string }>;
+  } | null>(null);
 
   const { data: events } = useQuery({
     queryKey: ['admin-events'],
@@ -310,30 +323,35 @@ function RegistrationsContent() {
                     <td className="p-3 text-slate-400">
                       {teams?.name ? (
                         <div className="space-y-1.5">
-                          <p className="font-bold text-amber-300 text-xs">Team: {teams.name}</p>
-                          <div className="text-[11px] text-slate-300 bg-slate-900/80 rounded-md p-1.5 border border-slate-800">
-                            <span className="font-semibold text-violet-300">Leader (M1): </span>
-                            <span className="font-medium text-slate-100">{users?.name || 'N/A'}</span>
-                            {users?.membership_no ? (
-                              <span className="ml-1 text-emerald-400 font-mono font-semibold">(Membership ID: {users.membership_no})</span>
-                            ) : (
-                              <span className="ml-1 text-slate-500 font-mono text-[10px]">(No Membership ID)</span>
-                            )}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-amber-300 text-xs">Team: {teams.name}</span>
+                            <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              {teamMembersList.length + 1} Members
+                            </span>
                           </div>
-                          {teamMembersList.map((m, idx) => (
-                            <div key={idx} className="text-[11px] text-slate-300 bg-slate-900/50 rounded-md p-1.5 border border-slate-800/80">
-                              <span className="font-semibold text-slate-400">Member {idx + 2}: </span>
-                              <span className="font-medium text-slate-200">{m.name}</span>
-                              {m.membership_no ? (
-                                <span className="ml-1 text-emerald-400 font-mono font-semibold">(Membership ID: {m.membership_no})</span>
-                              ) : (
-                                <span className="ml-1 text-slate-500 font-mono text-[10px]">(No Membership ID)</span>
-                              )}
-                            </div>
-                          ))}
+                          <button
+                            onClick={() =>
+                              setViewingTeam({
+                                teamName: teams.name || 'Unnamed Team',
+                                leader: {
+                                  name: users?.name,
+                                  email: users?.email,
+                                  phone: users?.phone,
+                                  membership_no: users?.membership_no,
+                                  college: users?.college,
+                                  branch: users?.branch,
+                                  year: users?.year,
+                                },
+                                members: teamMembersList,
+                              })
+                            }
+                            className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 bg-violet-600/10 border border-violet-500/20 px-2.5 py-1 rounded-lg transition-colors hover:bg-violet-600/20 font-medium"
+                          >
+                            <Users className="h-3.5 w-3.5" /> View Details
+                          </button>
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-500">Solo</span>
+                        <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-0.5 rounded border border-slate-800">Solo</span>
                       )}
                     </td>
                     <td className="p-3">
@@ -517,6 +535,104 @@ function RegistrationsContent() {
               className="w-full rounded-xl bg-violet-600 py-2.5 font-semibold text-white hover:bg-violet-500 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {editUserMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Team Details Modal */}
+      {viewingTeam && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setViewingTeam(null)}
+        >
+          <div 
+            className="glass rounded-xl p-6 w-full max-w-lg space-y-5 relative border border-slate-800 shadow-2xl max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setViewingTeam(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800/60 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-xl font-bold text-amber-400">Team: {viewingTeam.teamName}</h3>
+                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  {viewingTeam.members.length + 1} Total Members
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Full team composition and membership details</p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Team Leader */}
+              <div className="p-4 rounded-xl bg-slate-900/90 border border-violet-500/30 space-y-2.5 shadow-sm">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-violet-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <UserCheck className="h-4 w-4" /> Leader (Member 1)
+                  </span>
+                  {viewingTeam.leader.membership_no ? (
+                    <span className="text-xs font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      ID: {viewingTeam.leader.membership_no}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded">No Membership ID</span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-100 text-base">{viewingTeam.leader.name || 'N/A'}</p>
+                  <div className="text-xs text-slate-400 mt-1.5 space-y-1">
+                    {viewingTeam.leader.email && (
+                      <p><span className="text-slate-500">Email:</span> {viewingTeam.leader.email}</p>
+                    )}
+                    {viewingTeam.leader.phone && (
+                      <p><span className="text-slate-500">Phone:</span> {viewingTeam.leader.phone}</p>
+                    )}
+                    {(viewingTeam.leader.college || viewingTeam.leader.branch) && (
+                      <p>
+                        <span className="text-slate-500">College:</span> {viewingTeam.leader.college || 'N/A'}
+                        {viewingTeam.leader.branch ? ` (${viewingTeam.leader.branch}${viewingTeam.leader.year ? ` - Year ${viewingTeam.leader.year}` : ''})` : ''}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Other Team Members */}
+              {viewingTeam.members.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-1">Other Team Members</h4>
+                  <div className="space-y-2">
+                    {viewingTeam.members.map((member, idx) => (
+                      <div key={idx} className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                          <span className="text-[11px] font-semibold text-slate-400 block">Member {idx + 2}</span>
+                          <span className="font-medium text-slate-200 text-sm">{member.name}</span>
+                        </div>
+                        {member.membership_no ? (
+                          <span className="text-xs font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                            ID: {member.membership_no}
+                          </span>
+                        ) : (
+                          <span className="text-xs font-mono text-slate-500 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/50">
+                            No Membership ID
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setViewingTeam(null)}
+              className="w-full rounded-xl bg-slate-800 py-2.5 text-sm font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
+            >
+              Close
             </button>
           </div>
         </div>
