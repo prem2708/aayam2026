@@ -33,13 +33,13 @@ export function Footer() {
           </div>
 
           {/* Partner cards */}
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
 
             {/* RKDF University */}
             <motion.div
               whileHover={{ scale: 1.04, y: -3 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="flex items-center gap-4 rounded-2xl px-6 py-4"
+              className="flex items-center gap-3.5 rounded-2xl px-5 py-3.5"
               style={{
                 background: 'rgba(96,165,250,0.06)',
                 border: '1px solid rgba(96,165,250,0.14)',
@@ -48,25 +48,22 @@ export function Footer() {
             >
               <img
                 src="https://ik.imagekit.io/ioyklag3bb/RKDF-LOGO.png"
-                alt="RKDF University"
-                className="h-12 sm:h-14 w-auto object-contain"
+                alt="RKDF University Ranchi"
+                className="h-10 sm:h-12 w-auto object-contain shrink-0"
                 style={{ filter: 'drop-shadow(0 2px 8px rgba(96,165,250,0.2))' }}
               />
               <div className="text-left">
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
-                  style={{ color: 'rgba(245,158,11,0.8)' }}>Host Partner</p>
-                <span className="text-base font-bold font-heading text-white">RKDF University</span>
+                  style={{ color: 'rgba(245,158,11,0.85)' }}>Host Partner</p>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">RKDF University</span>
               </div>
             </motion.div>
-
-            {/* Divider */}
-            <div className="hidden sm:block h-14 w-px" style={{ background: 'linear-gradient(to bottom, transparent, rgba(96,165,250,0.2), transparent)' }} />
 
             {/* Aayam Tech Club */}
             <motion.div
               whileHover={{ scale: 1.04, y: -3 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="flex items-center gap-4 rounded-2xl px-6 py-4"
+              className="flex items-center gap-3.5 rounded-2xl px-5 py-3.5"
               style={{
                 background: 'rgba(167,139,250,0.06)',
                 border: '1px solid rgba(167,139,250,0.14)',
@@ -76,13 +73,85 @@ export function Footer() {
               <img
                 src="https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png?updatedAt=1781854543014"
                 alt="Aayam Logo"
-                className="h-12 sm:h-14 w-auto object-contain rounded-xl shrink-0"
+                className="h-10 sm:h-12 w-auto object-contain rounded-xl shrink-0"
                 style={{ filter: 'drop-shadow(0 2px 10px rgba(167,139,250,0.35))' }}
               />
               <div className="text-left">
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
-                  style={{ color: 'rgba(167,139,250,0.8)' }}>Organized By</p>
-                <span className="text-base font-bold font-heading text-white">Aayam Tech Club</span>
+                  style={{ color: 'rgba(167,139,250,0.85)' }}>Organized By</p>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">Aayam Tech Club</span>
+              </div>
+            </motion.div>
+
+            {/* Google Developer Group Ranchi */}
+            <motion.div
+              whileHover={{ scale: 1.04, y: -3 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="flex items-center gap-3.5 rounded-2xl px-5 py-3.5"
+              style={{
+                background: 'rgba(52,168,83,0.06)',
+                border: '1px solid rgba(52,168,83,0.16)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+              }}
+            >
+              <img
+                src="https://ik.imagekit.io/ioyklag3bb/logo_gdg-removebg-preview.png?updatedAt=1763748679524"
+                alt="Google Developer Group Ranchi Logo"
+                className="h-10 sm:h-12 w-auto object-contain shrink-0"
+                style={{ filter: 'drop-shadow(0 2px 10px rgba(52,168,83,0.3))' }}
+              />
+              <div className="text-left">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
+                  style={{ color: 'rgba(52,168,83,0.9)' }}>Community Partner</p>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">GDG Ranchi</span>
+              </div>
+            </motion.div>
+
+            {/* Vasudev AI */}
+            <motion.div
+              whileHover={{ scale: 1.04, y: -3 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="flex items-center gap-3.5 rounded-2xl px-5 py-3.5"
+              style={{
+                background: 'rgba(96,165,250,0.06)',
+                border: '1px solid rgba(96,165,250,0.16)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+              }}
+            >
+              <img
+                src="https://ik.imagekit.io/ioyklag3bb/Vasudev%20ai%20logo%20PNG.png"
+                alt="Vasudev AI Logo"
+                className="h-10 sm:h-12 w-auto object-contain rounded-xl shrink-0"
+                style={{ filter: 'drop-shadow(0 2px 10px rgba(96,165,250,0.35))' }}
+              />
+              <div className="text-left">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
+                  style={{ color: 'rgba(96,165,250,0.9)' }}>AI Partner</p>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">Vasudev AI</span>
+              </div>
+            </motion.div>
+
+            {/* Polorix Studio */}
+            <motion.div
+              whileHover={{ scale: 1.04, y: -3 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="flex items-center gap-3.5 rounded-2xl px-5 py-3.5"
+              style={{
+                background: 'rgba(244,114,182,0.06)',
+                border: '1px solid rgba(244,114,182,0.16)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+              }}
+            >
+              <img
+                src="https://ik.imagekit.io/ioyklag3bb/PS%20LOGO.png"
+                alt="Polorix Studio Logo"
+                className="h-10 sm:h-12 w-auto object-contain shrink-0"
+                style={{ filter: 'drop-shadow(0 2px 10px rgba(244,114,182,0.35))' }}
+              />
+              <div className="text-left">
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
+                  style={{ color: 'rgba(244,114,182,0.9)' }}>Creative Partner</p>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">Polorix Studio</span>
               </div>
             </motion.div>
 
