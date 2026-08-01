@@ -10,7 +10,7 @@ export async function registerForEvent(req: AuthRequest, res: import('express').
   const userId = req.userId!;
   const event_id = req.body.event_id as string;
   const team_name = req.body.team_name as string | undefined;
-  const team_members = req.body.team_members as string[] | undefined;
+  const team_members = req.body.team_members as Array<string | { name: string; membership_no?: string }> | undefined;
 
   // Validate user profile onboarding exists
   const userExists = await prisma.users.findUnique({
@@ -30,6 +30,25 @@ export async function registerForEvent(req: AuthRequest, res: import('express').
 
   if (!event) throw new AppError(404, 'Event not found');
   if (event.status !== 'open') throw new AppError(400, 'Registration is not open');
+
+  if (event.is_membership) {
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { membership_no: true },
+    });
+    if (!user?.membership_no?.trim()) {
+      throw new AppError(400, 'Membership / Reg No is required for this event');
+    }
+    if (event.is_team_event && team_members?.length) {
+      for (const member of team_members) {
+        const parsed = typeof member === 'string' ? { name: member } : member;
+        if (!parsed.name?.trim()) continue;
+        if (!parsed.membership_no?.trim()) {
+          throw new AppError(400, `Membership / Reg No is required for teammate ${parsed.name}`);
+        }
+      }
+    }
+  }
   const now = new Date();
   if (now < event.reg_start_at || now > event.reg_end_at) {
     throw new AppError(400, 'Registration window is closed');

@@ -75,6 +75,7 @@ export interface AdminEvent {
   reg_start_at: string;
   reg_end_at: string;
   is_team_event: boolean;
+  is_membership?: boolean;
   min_team_size: number;
   max_team_size: number;
   participant_cap?: number;

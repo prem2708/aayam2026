@@ -111,9 +111,14 @@ export async function createEvent(req: AdminAuthRequest, res: import('express').
 export async function updateEvent(req: AdminAuthRequest, res: import('express').Response) {
   const eventId = req.params.id as string;
   try {
+    // Strip undefined fields so Prisma only updates fields that were explicitly provided
+    const updateData = Object.fromEntries(
+      Object.entries(req.body).filter(([, v]) => v !== undefined)
+    );
+
     const data = await prisma.events.update({
       where: { id: eventId },
-      data: req.body,
+      data: updateData,
     });
 
     await prisma.audit_logs.create({

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, Info, IndianRupee, Gift } from 'lucide-react';
+import { Loader2, Plus, Trash2, Info, IndianRupee, Gift, IdCard, UserCheck } from 'lucide-react';
 import { useState } from 'react';
 import { adminFetch } from '@/lib/api';
 import { ImageUpload } from '@/components/ImageUpload';
@@ -27,6 +27,8 @@ export default function NewEventPage() {
 
   // Paid / Free toggle
   const [isPaid, setIsPaid] = useState(false);
+  // Membership Event toggle
+  const [isMembership, setIsMembership] = useState(false);
 
   const addPrizeRow = () => setPrizesList([...prizesList, { position: '', amount: '' }]);
   const removePrizeRow = (index: number) => setPrizesList(prizesList.filter((_, i) => i !== index));
@@ -40,7 +42,7 @@ export default function NewEventPage() {
     defaultValues: {
       title: '', category: 'technical', description: '', rules: '', venue: '', whatsapp_link: '',
       event_start_at: '', event_end_at: '', reg_start_at: '', reg_end_at: '',
-      is_team_event: false, min_team_size: 1, max_team_size: 4, status: 'draft',
+      is_team_event: false, is_membership: false, min_team_size: 1, max_team_size: 4, status: 'draft',
       is_featured: false, requires_approval: false, allow_cancellation: true,
       participant_cap: '', per_person_amount: '',
       bank_name: '', bank_account_no: '', bank_ifsc: '', bank_recipient_name: '',
@@ -81,6 +83,7 @@ export default function NewEventPage() {
         reg_start_at: formatToIso(data.reg_start_at),
         reg_end_at: formatToIso(data.reg_end_at),
         is_team_event: Boolean(data.is_team_event),
+        is_membership: Boolean(isMembership),
         is_featured: Boolean(data.is_featured),
         requires_approval: Boolean(data.requires_approval),
         allow_cancellation: Boolean(data.allow_cancellation),
@@ -172,7 +175,36 @@ export default function NewEventPage() {
                 Team Event
               </label>
             </div>
-            <div className="flex flex-wrap gap-4">
+            {/* Membership Registration Option Buttons */}
+            <div className="border-t border-slate-800/80 pt-3">
+              <label className="text-sm text-slate-300 mb-2 block font-medium">User Registration Form Type</label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsMembership(false)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                    !isMembership
+                      ? 'bg-blue-600/20 border-blue-500/50 text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.15)]'
+                      : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                  }`}
+                >
+                  <UserCheck className="h-4 w-4" /> Normal Registration Form
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsMembership(true)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                    isMembership
+                      ? 'bg-amber-600/20 border-amber-500/50 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]'
+                      : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                  }`}
+                >
+                  <IdCard className="h-4 w-4" /> Membership Event (Membership / Reg No)
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4 pt-1">
               <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer"><input type="checkbox" {...register('is_featured')} /> Featured</label>
               <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer"><input type="checkbox" {...register('requires_approval')} /> Requires Approval</label>
             </div>

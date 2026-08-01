@@ -50,6 +50,17 @@ const isoDateTime = z.preprocess((val) => {
   return val;
 }, z.string().datetime());
 
+// Optional version for PATCH requests — accepts undefined/null/empty string
+const isoDateTimeOptional = z.preprocess((val) => {
+  if (val === undefined || val === null) return undefined;
+  if (typeof val === 'string' && val.trim() === '') return undefined;
+  if (typeof val === 'string') {
+    const d = new Date(val);
+    return !isNaN(d.getTime()) ? d.toISOString() : undefined;
+  }
+  return undefined;
+}, z.string().datetime().optional());
+
 export const eventSchema = z.object({
   title: z.string().min(3).max(200),
   slug: z.string().min(3).max(200).optional(),
@@ -73,6 +84,7 @@ export const eventSchema = z.object({
   reg_start_at: isoDateTime,
   reg_end_at: isoDateTime,
   is_team_event: z.boolean().default(false),
+  is_membership: z.boolean().default(false),
   min_team_size: z.number().int().min(1).default(1),
   max_team_size: z.number().int().min(1).default(1),
   participant_cap: z.number().int().positive().optional().nullable(),
@@ -98,7 +110,18 @@ export const eventSchema = z.object({
   coordinators: z.array(z.object({ name: z.string(), contact: z.string().optional() })).optional(),
 });
 
-export const updateEventSchema = eventSchema.partial();
+// Update schema: all fields optional, datetime fields use the optional preprocessor
+export const updateEventSchema = eventSchema.partial().extend({
+  event_start_at: isoDateTimeOptional,
+  event_end_at: isoDateTimeOptional,
+  reg_start_at: isoDateTimeOptional,
+  reg_end_at: isoDateTimeOptional,
+  is_membership: z.boolean().optional(),
+  is_team_event: z.boolean().optional(),
+  is_featured: z.boolean().optional(),
+  requires_approval: z.boolean().optional(),
+  allow_cancellation: z.boolean().optional(),
+});
 
 export const eventQuerySchema = z.object({
   category: z.enum(['technical', 'cultural', 'gaming', 'workshop', 'hackathon']).optional(),
@@ -118,9 +141,11 @@ export const registerSchema = z.object({
       z.object({
         name: z.string().min(1),
         membership_no: z.string().optional().nullable(),
+        reg_no: z.string().optional().nullable(),
       }),
     ])
   ).optional(),
+  membership_reg_no: z.string().optional().nullable(),
   payment_proof_url: z.string().url().optional().nullable().or(z.literal('')),
   payment_proof_file_id: z.string().optional().nullable(),
   transaction_id: z.string().optional().nullable().or(z.literal('')),

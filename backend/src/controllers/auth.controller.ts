@@ -59,12 +59,17 @@ export async function getProfile(req: AuthRequest, res: import('express').Respon
 }
 
 export async function updateProfile(req: AuthRequest, res: import('express').Response) {
+  const { name, college, branch, year, phone, membership_no } = req.body;
   try {
     const data = await prisma.users.update({
       where: { id: req.userId! },
       data: {
-        ...req.body,
-        year: req.body.year ? Number(req.body.year) : undefined,
+        ...(name !== undefined && { name }),
+        ...(college !== undefined && { college }),
+        ...(branch !== undefined && { branch }),
+        ...(year !== undefined && { year: year ? Number(year) : null }),
+        ...(phone !== undefined && { phone }),
+        ...(membership_no !== undefined && { membership_no: membership_no || null }),
       },
     });
     res.json({ success: true, data });

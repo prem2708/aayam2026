@@ -16,7 +16,6 @@ const schema = z.object({
   branch: z.string().optional(),
   year: z.number().int().min(1).max(6).optional(),
   phone: z.string().optional(),
-  membership_no: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -88,10 +87,6 @@ export default function OnboardingPage() {
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-1">Phone</label>
           <input {...register('phone')} placeholder="Phone Number" className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">Membership ID / Reg No</label>
-          <input {...register('membership_no')} placeholder="e.g. MEM12345" className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50" />
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-300 mb-1">Year</label>

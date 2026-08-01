@@ -106,6 +106,7 @@ model events {
   reg_start_at       DateTime        @db.Timestamptz
   reg_end_at         DateTime        @db.Timestamptz
   is_team_event      Boolean         @default(false)
+  is_membership      Boolean         @default(false)
   min_team_size      Int             @default(1) @db.SmallInt
   max_team_size      Int             @default(1) @db.SmallInt
   participant_cap     Int?
@@ -160,6 +161,7 @@ model registrations {
   status                reg_status  @default(pending)
   qr_token              String      @unique
   registration_no       String?
+  membership_reg_no     String?
   payment_proof_url     String?
   payment_proof_file_id String?
   transaction_id        String?

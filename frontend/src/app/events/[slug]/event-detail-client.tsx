@@ -31,7 +31,9 @@ function getPrizeStyle(place: string) {
   return { color: 'text-violet-400', bg: 'bg-violet-950/20', border: 'border-violet-500/20', glow: 'shadow-sm' };
 }
 
-export function EventDetailClient({ event }: { event: Event }) {
+export function EventDetailClient({ event: initialEvent }: { event: Event }) {
+  const [event, setEvent] = useState<Event>(initialEvent);
+  const isMembership = Boolean(event.is_membership);
   const { getToken, isSignedIn } = useAuth();
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
@@ -44,7 +46,7 @@ export function EventDetailClient({ event }: { event: Event }) {
   const maxExtras = Math.max(0, event.max_team_size - 1);
   const [isCreatingTeam, setIsCreatingTeam] = useState(!event.is_team_event);
   const [teamConfirmed, setTeamConfirmed] = useState(!event.is_team_event);
-  const [teammates, setTeammates] = useState<{ name: string; membership_no: string }[]>([]);
+  const [teammates, setTeammates] = useState<{ name: string; membership_no?: string }[]>([]);
   const [paymentProof, setPaymentProof] = useState({ url: '', fileId: '' });
   const [transactionId, setTransactionId] = useState('');
   const [uploadingProof, setUploadingProof] = useState(false);
@@ -63,9 +65,39 @@ export function EventDetailClient({ event }: { event: Event }) {
     membership_no: '',
   });
 
+  const emptyTeammate = () =>
+    isMembership ? { name: '', membership_no: '' } : { name: '' };
+
   const gradient = CATEGORY_COLORS[event.category] || 'from-violet-500 to-purple-500';
   const baseAmount = event.per_person_amount || event.amount || 0;
   const regOpen = event.status === 'open' && new Date() >= new Date(event.reg_start_at) && new Date() <= new Date(event.reg_end_at);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch<Event>(`/events/${initialEvent.slug}`).then((res) => {
+      if (!cancelled && res.success && res.data) {
+        setEvent((prev) => ({
+          ...res.data!,
+          // Keep membership flag if production API omits the field
+          is_membership: res.data!.is_membership ?? prev.is_membership,
+        }));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialEvent.slug]);
+
+  // When membership mode loads (e.g. after client refetch), ensure teammate rows have ID fields
+  useEffect(() => {
+    if (!isMembership) return;
+    setTeammates((prev) =>
+      prev.map((t) => ({
+        name: t.name,
+        membership_no: t.membership_no ?? '',
+      }))
+    );
+  }, [isMembership]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -178,6 +210,20 @@ export function EventDetailClient({ event }: { event: Event }) {
       }
     }
 
+    if (isMembership) {
+      if (!profileForm.membership_no?.trim()) {
+        toast.error('Please enter your Membership / Reg No.');
+        return;
+      }
+      if (event.is_team_event) {
+        const missingMembership = teammates.find((t) => t.name.trim() && !t.membership_no?.trim());
+        if (missingMembership) {
+          toast.error(`Please enter Membership / Reg No for ${missingMembership.name}.`);
+          return;
+        }
+      }
+    }
+
     setLoading(true);
     try {
       const token = await getToken();
@@ -206,7 +252,6 @@ export function EventDetailClient({ event }: { event: Event }) {
       }
       setShowProfileModal(true);
     } catch (e) {
-      // Assuming no profile onboarding exists yet
       setProfileForm({
         name: user?.fullName || '',
         college: '',
@@ -231,6 +276,10 @@ export function EventDetailClient({ event }: { event: Event }) {
       toast.error('College is required');
       return;
     }
+    if (isMembership && !profileForm.membership_no?.trim()) {
+      toast.error('Membership / Reg No is required for this event.');
+      return;
+    }
 
     const requiresPayment = !!event.payment_qr_url || !!event.bank_name;
     if (requiresPayment) {
@@ -253,7 +302,7 @@ export function EventDetailClient({ event }: { event: Event }) {
         toast.error('Team Name is required');
         return;
       }
-      const activeTeammates = teammates.filter(Boolean);
+      const activeTeammates = teammates.filter((t) => t.name.trim());
       const totalSize = activeTeammates.length + 1;
       const minSize = event.min_team_size ?? 1;
       if (totalSize < minSize) {
@@ -280,8 +329,11 @@ export function EventDetailClient({ event }: { event: Event }) {
         branch: profileForm.branch || null,
         year: profileForm.year ? Number(profileForm.year) : null,
         phone: profileForm.phone || null,
-        membership_no: profileForm.membership_no || null,
       };
+
+      if (isMembership) {
+        profileData.membership_no = profileForm.membership_no?.trim() || null;
+      }
 
       if (isNewProfile) {
         profileData.email = user?.primaryEmailAddress?.emailAddress || '';
@@ -298,6 +350,7 @@ export function EventDetailClient({ event }: { event: Event }) {
       }
 
       // 2. Submit Event Registration
+      const activeTeammates = teammates.filter((t) => t.name.trim());
       const body: Record<string, any> = {
         event_id: event.id,
         payment_proof_url: paymentProof.url || null,
@@ -306,7 +359,12 @@ export function EventDetailClient({ event }: { event: Event }) {
       };
       if (event.is_team_event) {
         body.team_name = teamName;
-        body.team_members = teammates.filter((t) => t.name.trim());
+        body.team_members = isMembership
+          ? activeTeammates.map((t) => ({
+              name: t.name.trim(),
+              membership_no: t.membership_no?.trim() || '',
+            }))
+          : activeTeammates.map((t) => t.name.trim());
       }
       const res = await apiFetch('/registrations', {
         method: 'POST',
@@ -522,6 +580,30 @@ export function EventDetailClient({ event }: { event: Event }) {
 
               {regOpen ? (
                 <>
+                  {/* Membership Event Indicator Header */}
+                  {isMembership && (
+                    <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300 flex items-center gap-2 font-medium shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+                      <Sparkle className="h-4 w-4 text-amber-400 shrink-0" />
+                      <span>Membership Event: Membership / Reg No is required to register.</span>
+                    </div>
+                  )}
+
+                  {/* Solo Event Membership Input */}
+                  {!event.is_team_event && isMembership && (
+                    <div className="mb-5 space-y-2">
+                      <label className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
+                        Membership / Reg No <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={profileForm.membership_no}
+                        onChange={(e) => setProfileForm({ ...profileForm, membership_no: e.target.value })}
+                        placeholder="e.g. MEM12345 or REG2025001"
+                        className={inputClass}
+                      />
+                    </div>
+                  )}
+
                   {event.is_team_event && (
                     <div className="space-y-3 mb-5">
                       {/* Header */}
@@ -539,7 +621,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                             setIsCreatingTeam(true);
                             if (teammates.length === 0) {
                               const minNeeded = Math.max(1, (event.min_team_size ?? 1) - 1);
-                              setTeammates(Array.from({ length: minNeeded }, () => ({ name: '', membership_no: '' })));
+                              setTeammates(Array.from({ length: minNeeded }, emptyTeammate));
                             }
                           }}
                           className="w-full rounded-xl border border-dashed border-violet-500/40 py-3.5 text-sm font-bold text-violet-400 hover:bg-violet-500/10 transition-all flex items-center justify-center gap-2"
@@ -555,9 +637,17 @@ export function EventDetailClient({ event }: { event: Event }) {
                               <span className="text-emerald-400">Leader</span>
                             </div>
                             <p className="font-semibold text-slate-200">{profileForm.name || user?.fullName || 'Team Leader'}</p>
-                            <p className="text-slate-400">
-                              Membership ID: <span className="text-violet-300 font-mono">{profileForm.membership_no || 'Not set'}</span>
-                            </p>
+                            {isMembership && (
+                              <div className="pt-1.5">
+                                <label className="text-[10px] text-amber-400 font-semibold mb-1 block">Membership / Reg No <span className="text-red-400">*</span></label>
+                                <input
+                                  value={profileForm.membership_no}
+                                  onChange={(e) => setProfileForm({ ...profileForm, membership_no: e.target.value })}
+                                  placeholder="e.g. MEM12345 or REG2025001"
+                                  className={inputClass}
+                                />
+                              </div>
+                            )}
                           </div>
 
                           {/* Team Name */}
@@ -601,19 +691,21 @@ export function EventDetailClient({ event }: { event: Event }) {
                                   className={inputClass}
                                 />
                               </div>
-                              <div>
-                                <label className="text-[10px] text-slate-400 font-semibold mb-1 block">Team Member {idx + 2} Membership ID / Reg No</label>
-                                <input
-                                  value={member.membership_no}
-                                  onChange={(e) => {
-                                    const copy = [...teammates];
-                                    copy[idx] = { ...copy[idx], membership_no: e.target.value };
-                                    setTeammates(copy);
-                                  }}
-                                  placeholder={`Enter Member ${idx + 2} Membership ID`}
-                                  className={inputClass}
-                                />
-                              </div>
+                              {isMembership && (
+                                <div>
+                                  <label className="text-[10px] text-amber-400 font-semibold mb-1 block">Membership / Reg No <span className="text-red-400">*</span></label>
+                                  <input
+                                    value={member.membership_no}
+                                    onChange={(e) => {
+                                      const copy = [...teammates];
+                                      copy[idx] = { ...copy[idx], membership_no: e.target.value };
+                                      setTeammates(copy);
+                                    }}
+                                    placeholder={`Member ${idx + 2} Membership / Reg No`}
+                                    className={inputClass}
+                                  />
+                                </div>
+                              )}
                             </div>
                           ))}
 
@@ -621,7 +713,7 @@ export function EventDetailClient({ event }: { event: Event }) {
                           {teammates.length < maxExtras && (
                             <button
                               type="button"
-                              onClick={() => setTeammates([...teammates, { name: '', membership_no: '' }])}
+                              onClick={() => setTeammates([...teammates, emptyTeammate()])}
                               className="w-full rounded-xl border border-dashed border-violet-500/40 py-2.5 text-xs font-bold text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/70 transition-all flex items-center justify-center gap-1.5"
                             >
                               <Plus className="h-3.5 w-3.5" /> Add Team Member {teammates.length + 2}
@@ -641,6 +733,17 @@ export function EventDetailClient({ event }: { event: Event }) {
                               if (!teamName.trim()) {
                                 toast.error('Team Name is required before proceeding.');
                                 return;
+                              }
+                              if (isMembership) {
+                                if (!profileForm.membership_no?.trim()) {
+                                  toast.error('Please enter your Membership / Reg No.');
+                                  return;
+                                }
+                                const missingMembership = active.find((t) => !t.membership_no?.trim());
+                                if (missingMembership) {
+                                  toast.error(`Please enter Membership / Reg No for ${missingMembership.name}.`);
+                                  return;
+                                }
                               }
                               setTeamConfirmed(true);
                             }}
@@ -663,10 +766,10 @@ export function EventDetailClient({ event }: { event: Event }) {
                               </button>
                             </div>
                             <div className="text-xs text-slate-400">
-                              Leader: {profileForm.name || user?.fullName || 'You'}{profileForm.membership_no ? ` (${profileForm.membership_no})` : ''}
+                              Leader: {profileForm.name || user?.fullName || 'You'}{isMembership && profileForm.membership_no ? ` (${profileForm.membership_no})` : ''}
                             </div>
                             <div className="text-xs text-slate-400 mt-1">
-                              Members: {teammates.filter((t) => t.name.trim()).map((m) => `${m.name}${m.membership_no ? ` (${m.membership_no})` : ''}`).join(', ')}
+                              Members: {teammates.filter((t) => t.name.trim()).map((m) => `${m.name}${isMembership && m.membership_no ? ` (${m.membership_no})` : ''}`).join(', ')}
                             </div>
                           </div>
 
@@ -872,16 +975,18 @@ export function EventDetailClient({ event }: { event: Event }) {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1.5">Membership ID / Reg No</label>
-                  <input
-                    type="text"
-                    value={profileForm.membership_no}
-                    onChange={(e) => setProfileForm({ ...profileForm, membership_no: e.target.value })}
-                    placeholder="e.g. MEM12345"
-                    className={inputClass}
-                  />
-                </div>
+                {isMembership && (
+                  <div>
+                    <label className="text-xs text-amber-400 font-bold uppercase tracking-wider block mb-1.5">Membership / Reg No</label>
+                    <input
+                      type="text"
+                      value={profileForm.membership_no}
+                      onChange={(e) => setProfileForm({ ...profileForm, membership_no: e.target.value })}
+                      placeholder="e.g. MEM12345 or REG2025001"
+                      className={inputClass}
+                    />
+                  </div>
+                )}
               </div>
 
               <button
