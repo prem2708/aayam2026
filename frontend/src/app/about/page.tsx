@@ -15,7 +15,7 @@ const team = [
   { name: 'Mrs. Kirti Verma', role: 'Faculty Coordinator', dept: 'Computer Science Dept' },
   { name: 'Prem Kumar', role: 'Organizer & Tech Lead', dept: 'B.Tech CSE, 4th Year' },
   { name: 'Sudhanshu Kumar Agrawal', role: 'Organizer & Social Media Head', dept: 'B.Tech CSE, 4th Year' },
-  { name: 'Md Warsih Anasari', role: 'Organizer & Student Convener', dept: 'B.Tech CSE, 4th Year' },
+  { name: 'Md Warish Ansari', role: 'Organizer & Student Convener', dept: 'B.Tech CSE, 4th Year' },
 ];
 
 const timeline = [

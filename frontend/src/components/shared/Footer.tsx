@@ -71,15 +71,15 @@ export function Footer() {
               }}
             >
               <img
-                src="https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Jun%2019,%202026,%2001_03_57%20PM.png?updatedAt=1781854543014"
-                alt="Aayam Logo"
+                src="https://ik.imagekit.io/ioyklag3bb/ChatGPT%20Image%20Aug%207,%202026,%2010_15_20%20AM.png"
+                alt="CodeVed - RKDF Coding Club Logo"
                 className="h-10 sm:h-12 w-auto object-contain rounded-xl shrink-0"
                 style={{ filter: 'drop-shadow(0 2px 10px rgba(167,139,250,0.35))' }}
               />
               <div className="text-left">
                 <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5"
                   style={{ color: 'rgba(167,139,250,0.85)' }}>Organized By</p>
-                <span className="text-sm sm:text-base font-bold font-heading text-white">Aayam Tech Club</span>
+                <span className="text-sm sm:text-base font-bold font-heading text-white">CodeVed - RKDF Coding Club</span>
               </div>
             </motion.div>
 
